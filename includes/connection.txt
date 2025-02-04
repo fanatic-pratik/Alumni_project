@@ -1,0 +1,18 @@
+<?php
+$host = 'localhost';
+    $dbname = 'practice1'; // Replace with your database name
+    $username = 'root'; // Default username for Laragon
+    $password = ''; // Default password for Laragon is empty
+    
+    try {
+        // Create a new PDO instance
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
+        
+        // Set PDO error mode to exception
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        echo "Connected successfully to the database!<br>";
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }
+    ?>
