@@ -40,14 +40,14 @@ function validateUsername($username) {
 
 // Function to validate Password
 function validatePassword($password) {
-    return preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password); // At least 8 chars, one letter, one number
+    return preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/", $password); // At least 8 chars, one letter, one number
 }
 
 // if(isset($_POST['submit'])){
 // Check if the form is submitted
 if(isset($_POST['submit'])) {
     // Sanitize and validate inputs
-    echo "hello";
+    // echo "hello";
     $prn = sanitizeInput($_POST['prn']);
     $name = sanitizeInput($_POST['name']);
     $gmail = sanitizeInput($_POST['email']);
@@ -86,21 +86,39 @@ if(isset($_POST['submit'])) {
     if (!validatePassword($password)) {
         $errors['password'] = "Invalid Password. It must be at least 8 characters long and contain at least one letter and one number.";
     }
-
-    
+    $password_h=password_hash($password, PASSWORD_DEFAULT);
+   
     // If there are no errors, process the data
     if (empty($errors)) {
-      echo "Registration Successful!<br>";
-      echo "PRN: " . $prn . "<br>";
-      echo "Name: " . $name . "<br>";
-      echo "Gmail: " . $gmail . "<br>";
-      echo "Batch Year: " . $batchYear . "<br>";
-      echo "Section: " . $section . "<br>";
-      echo "Username: " . $username . "<br>";
-      echo "Password: " . $password . "<br>";
+        $sql = "INSERT INTO users (user_prn, uname, user_email, batch_year, month_section, username, password)
+            VALUES (:prn, :name, :email, :batch_year, :section, :username, :password)";
+            try{
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':prn', $prn);
+                $stmt->bindParam(':name', $name);
+                $stmt->bindParam(':email', $gmail);
+                $stmt->bindParam(':batch_year', $batchYear);
+                $stmt->bindParam(':section', $section);
+                $stmt->bindParam(':username', $username);
+                $stmt->bindParam(':password', $password_h);
+
+                if($stmt->execute()){
+                    echo "Registration Successful";
+                }
+                else{
+                    echo "Registration Failed";
+                }
+            }
+            catch(PDOException $e){
+                if($e->getCode()==23000){
+                    echo "Error: Duplicate entry for PRN, Email, or Username.";
+                }else{
+                    echo "Database error: ". $e->getMessage();
+                }
+            }
     } else {
         // Display errors
-        echo "<h2>Errors:</h2>";
+        // echo "<h2>Errors:</h2>";
         // foreach ($errors as $error) {
         //     echo "<p>" . $error . "</p>";
         // }
