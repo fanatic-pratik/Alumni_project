@@ -1,0 +1,16 @@
+body {
+    font-family: Arial, sans-serif;
+}
+#company_input {
+    margin-top: 10px;
+    list-style-type: none;
+    padding: 0;
+}
+.company-item {
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+.remove-company {
+    margin-left: 10px;
+    cursor: pointer;
+}
