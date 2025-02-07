@@ -1,3 +1,86 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "user_profiles";
+
+// Connect to database
+// $conn = new mysqli($servername, $username, $password, $dbname);
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
+
+if(isset($_POST['submit'])){
+// 🔴 Validate and Sanitize Input Function
+function clean_input($data) {
+    return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+}
+
+// 🛑 Validate and Sanitize Inputs
+$name = clean_input($_POST['name']);
+$dob = clean_input($_POST['dob']);
+$gender = clean_input($_POST['gender']);
+$bio = clean_input($_POST['bio']);
+
+$graduation_year = filter_var($_POST['graduation_year'], FILTER_VALIDATE_INT);
+$course = clean_input($_POST['course']);
+$specialization = clean_input($_POST['specialization']);
+
+$job_title = clean_input($_POST['job_titlecurr']);
+$company = clean_input($_POST['company']);
+$industry = clean_input($_POST['industry']);
+$experience = filter_var($_POST['experience'], FILTER_VALIDATE_INT);
+$skills = clean_input($_POST['skills']);
+$projects = clean_input($_POST['current_projects']);
+
+$phone = clean_input($_POST['phone']);
+$linkedin = filter_var($_POST['linkedin'], FILTER_VALIDATE_URL);
+$github = filter_var($_POST['github'], FILTER_VALIDATE_URL);
+$blog = filter_var($_POST['website'], FILTER_VALIDATE_URL);
+
+
+$errors= [];
+// 🛑 Validate Image Upload
+if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
+    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!in_array($_FILES['profile_picture']['type'], $allowed_types) && $_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+        $errors['profile_picture']= "invalid file type or image size is more than 2mb";
+    }
+}
+
+function validateName($name) {
+    return preg_match("/^[a-zA-Z ]+$/", $name); // Only letters and spaces
+}
+
+// Function to validate Batch Year
+function validateGraduationYear($graduation_year) {
+    return preg_match("/^\d{4}$/", $graduation_year) && $graduation_year >= 2000 && $graduation_year <= date('Y');
+}
+
+function validateDOB($dob) {
+    return preg_match("/^\d{4}$/", $dob) && $dob <= 2010 && $dob <= date('Y');
+}
+
+
+
+
+// 🔴 Prepare SQL Statement to Prevent SQL Injection
+// $stmt = $conn->prepare("INSERT INTO users (name, dob, gender, bio, graduation_year, course, specialization, phone, linkedin, github) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+// $stmt->bind_param("ssssisssss", $name, $dob, $gender, $bio, $graduation_year, $course, $specialization, $phone, $linkedin, $github);
+
+// if ($stmt->execute()) {
+//     echo "Profile updated successfully!";
+// } else {
+//     echo "Error: " . $stmt->error;
+// }
+
+// $stmt->close();
+// $conn->close();
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +92,7 @@
 </head>
 <body>
 
-    <form action="update_profile.php" method="POST" enctype="multipart/form-data">
+    <form action=" " method="POST" enctype="multipart/form-data">
         <h2>Personal Information</h2>
         <hr>
 
@@ -38,13 +121,10 @@
         <input type="number" id="graduation_year" name="graduation_year" required min=1990 max=2025><br><br>
 
         <label for="course">Course/Degree:</label>
-        <input type="text" id="course" name="course" required><br><br>
+        <input type="text" id="course" name="course" maxlength="20" required><br><br>
 
         <label for="specialization">Specialization:</label>
-        <input type="text" id="specialization" name="specialization"><br><br>
-
-        <label for="academic_achievements">Academic Achievements:</label>
-        <textarea id="academic_achievements" name="academic_achievements"></textarea><br><br>
+        <input type="text" id="specialization" name="specialization" maxlength="20"><br><br>
 
         <h2>Professional Information</h2>
         <hr>
@@ -66,10 +146,9 @@
         <input type="number" id="experience" name="experience" min=0><br><br>
 
         <label for="skills">Skills:</label>
-        <textarea id="skills" name="skills"></textarea><br><br>
+        <textarea id="skills" name="skills" maxlength="100"></textarea><br><br>
 
-        <label for="certifications">Certifications:</label>
-        <textarea id="certifications" name="certifications"></textarea><br><br>
+        
 
         <label for="current_projects">Projects:</label>
         <textarea id="current_projects" name="current_projects"></textarea><br><br>
@@ -106,16 +185,7 @@
         <label for="website">Website/Blog:</label>
         <input type="url" id="website" name="website"><br><br>
 
-        <h2>Additional Information</h2>
-        <hr>
-        <label for="interests">Interests:</label>
-        <textarea id="interests" name="interests"></textarea><br><br>
-
-        <label for="achievements">Achievements:</label>
-        <textarea id="achievements" name="achievements"></textarea><br><br>
-
-        <label for="social_media">Social Media Links:</label>
-        <input type="url" id="social_media" name="social_media"><br><br>
+        
 
         <h2>Privacy Settings</h2>
         <hr>
@@ -133,7 +203,7 @@
         <input type="radio" id="contact_hide" name="contact_visibility" value="hide" checked>
         <label for="contact_hide">Hide</label><br><br>
 
-        <button type="submit">Create Profile</button>
+        <button type="submit" name="submit">Create Profile</button>
     </form>
 
     
