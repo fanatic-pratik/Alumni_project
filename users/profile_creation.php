@@ -61,8 +61,38 @@ function validateDOB($dob) {
     return preg_match("/^\d{4}$/", $dob) && $dob <= 2010 && $dob <= date('Y');
 }
 
+function validateBio($bio) {
+    return preg_match("/^[\w\s,]+$/u", $bio); // Only letters and spaces and commas ,underscore
+}
 
+function validateCourse($course) {
+    return preg_match("/^[\w\s,]+$/u", $course); // Only letters and spaces and commas ,underscore
+}
 
+function validateSpecialization($specialization) {
+    return preg_match("/^[\w\s,]+$/u", $specialization); // Only letters and spaces and commas ,underscore
+}
+
+function validateJobtitle($job_title) {
+    return preg_match("/^[\w\s,]+$/u", $job_title); // Only letters and spaces and commas ,underscore
+}
+
+function validateCompany($company) {
+    return preg_match("/^[\w\s,]+$/u", $company); // Only letters and spaces and commas ,underscore
+}
+
+function validateBio($skills) {
+    return preg_match("/^[\w\s,]+$/u", $skills); // Only letters and spaces and commas ,underscore
+}
+
+function validateProjects($projects) {
+    return preg_match("/^[\w\s,]+$/u", $projects); // Only letters and spaces and commas ,underscore
+}
+
+function validatePhone($phone) {
+    $phone = str_replace(' ', '', $phone);
+    return preg_match("/^\+?\d{10,15}$/", $phone); // Only letters and spaces and commas ,underscore
+}
 
 // 🔴 Prepare SQL Statement to Prevent SQL Injection
 // $stmt = $conn->prepare("INSERT INTO users (name, dob, gender, bio, graduation_year, course, specialization, phone, linkedin, github) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -143,7 +173,7 @@ function validateDOB($dob) {
         </select><br><br>
 
         <label for="experience">Work Experience (Years):</label>
-        <input type="number" id="experience" name="experience" min=0><br><br>
+        <input type="number" id="experience" name="experience" min=0 max=30><br><br>
 
         <label for="skills">Skills:</label>
         <textarea id="skills" name="skills" maxlength="100"></textarea><br><br>
@@ -155,18 +185,25 @@ function validateDOB($dob) {
 
         <h3>Past Companies</h3>
 
-<div id="company_input">
-    <label for="company_name">Company Name:</label>
-    <input type="text" id="company_name" placeholder="Enter company name"><br><br>
+        <div id="companyContainer">
+      <!-- Initial company fields -->
+      <div class="company-group" id="company_1">
+        <label>Company Name:</label>
+        <input type="text" name="company_name[]" id="company_name_1" required>
 
-    <label for="job_title">Job Title:</label>
-    <input type="text" id="job_title" placeholder="Enter job title"><br><br>
+        <label>Role:</label>
+        <input type="text" name="role[]" id="role_1" required>
 
-    <label for="duration">Duration (Years):</label>
-    <input type="number" id="duration" placeholder="Enter duration" min=1><br><br>
+        <label>Experience:</label>
+        <input type="number" name="experience[]" id="experience_1" required min="0">
 
-    <button type="button" id="add_company">+ Add Company</button>
-</div>
+        <button type="button" onclick="removeCompany(1)">Remove</button>
+        <br><br>
+      </div>
+      
+    </div>
+    <button type="button" onclick="addCompany()">Add Company</button>
+    
 
 <!-- Display Added Companies -->
 <div id="past_companies_list"></div>
