@@ -38,27 +38,17 @@ $linkedin = filter_var($_POST['linkedin'], FILTER_VALIDATE_URL);
 $github = filter_var($_POST['github'], FILTER_VALIDATE_URL);
 $blog = filter_var($_POST['website'], FILTER_VALIDATE_URL);
 
-
-$errors= [];
-// 🛑 Validate Image Upload
-if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
-    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!in_array($_FILES['profile_picture']['type'], $allowed_types) && $_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
-        $errors['profile_picture']= "invalid file type or image size is more than 2mb";
-    }
-}
-
 function validateName($name) {
     return preg_match("/^[a-zA-Z ]+$/", $name); // Only letters and spaces
 }
 
 // Function to validate Batch Year
 function validateGraduationYear($graduation_year) {
-    return preg_match("/^\d{4}$/", $graduation_year) && $graduation_year >= 2000 && $graduation_year <= date('Y');
+    return preg_match("/^\d{4}$/", $graduation_year) && $graduation_year >= 1989 && $graduation_year <= date('Y');
 }
 
 function validateDOB($dob) {
-    return preg_match("/^\d{4}$/", $dob) && $dob <= 2010 && $dob <= date('Y');
+    return preg_match("/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d\d$/", $dob, $matches) && (int) $matches[3] >= 1989 && (int) $matches[3] <= date('Y');
 }
 
 function validateBio($bio) {
@@ -81,7 +71,7 @@ function validateCompany($company) {
     return preg_match("/^[\w\s,]+$/u", $company); // Only letters and spaces and commas ,underscore
 }
 
-function validateBio($skills) {
+function validateSkills($skills) {
     return preg_match("/^[\w\s,]+$/u", $skills); // Only letters and spaces and commas ,underscore
 }
 
@@ -94,6 +84,84 @@ function validatePhone($phone) {
     return preg_match("/^\+?\d{10,15}$/", $phone); // Only letters and spaces and commas ,underscore
 }
 
+
+
+$errors = [];
+// 🛑 Validate Image Upload
+if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
+    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!in_array($_FILES['profile_picture']['type'], $allowed_types) && $_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+        $errors['profile_picture']= "invalid file type or image size is more than 2mb";
+    }
+}
+
+if(!validateName($name) && !empty($name)){
+    $errors['name']= "name should contain letters and spaces only";
+}
+
+if(!validateGraduationYear($graduation_year)){
+    $errors['graduation_year']= "graduation year should be greater than 2000 and less than current year";
+}
+
+if(!empty($dob)){
+    if(preg_match("/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-(19|20)\d\d$/", $dob, $matches)){
+        $year = (int) $matches[3]; // Extract the year
+    $currentYear = (int) date('Y');
+
+    if ($year < 1900 || $year > $currentYear) {
+        $errors['dob'] = "invalid date of birth";
+    } else {
+        echo "Valid Date of Birth.";
+    }
+}
+    
+
+}
+// if(!validateDOB($dob) && !empty($dob)){
+//     $errors['dob'] = "invalid birth-date";
+// }
+
+if(!validateBio($bio) && !empty($bio)){
+    $errors['bio'] = "bio should only contain letters, spaces, commas only";
+}
+
+if(!validateCourse($course)){
+    $errors['course'] = "course should only contain letters, spaces, commas only";
+}
+
+if(!validateSpecialization($specialization)){
+    $errors['specialization'] = "specialization should only contain letters, spaces, commas only";
+}
+
+if(!validateJobtitle($job_title) && !empty($job_title)){
+    $errors['job_title'] = "Job_title should only contain letters, spaces, commas only";
+}
+
+if(!validateCompany($company) && !empty($company)){
+    $errors['company'] = "company should only contain letters, spaces, commas only";
+}
+
+if(!validateSkills($skills) && !empty($skills)){
+    $errors['skills'] = "skills should only contain letters, spaces, commas only";
+}
+
+if(!validateProjects($projects) && !empty($projects)){
+    $errors['projects'] = "projects should only contain letters, spaces, commas only";
+}
+
+if(!validatePhone($phone) && !empty($phone)){
+    $errors['phone'] = "phone should only contain numbers, spaces only";
+}
+
+
+if(empty($errors)){
+    echo "successful";
+}
+else{
+    foreach($errors as $error){
+        echo $error;
+    }
+}
 // 🔴 Prepare SQL Statement to Prevent SQL Injection
 // $stmt = $conn->prepare("INSERT INTO users (name, dob, gender, bio, graduation_year, course, specialization, phone, linkedin, github) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 // $stmt->bind_param("ssssisssss", $name, $dob, $gender, $bio, $graduation_year, $course, $specialization, $phone, $linkedin, $github);
@@ -106,6 +174,26 @@ function validatePhone($phone) {
 
 // $stmt->close();
 // $conn->close();
+$v_name = isset($_POST['submit'])? $name: '';
+$v_dob = isset($_POST['submit'])? $dob: '';
+$v_gender = isset($_POST['submit'])? $gender: '';
+$v_bio = isset($_POST['submit'])? $bio: '';
+
+$v_graduation_year = isset($_POST['submit'])? $graduation_year: '';
+$v_course = isset($_POST['submit'])? $course: '';
+$v_specialization = isset($_POST['submit'])? $specialization: '';
+
+$v_job_title = isset($_POST['submit'])? $job_title: '';
+$v_company = isset($_POST['submit'])? $company: '';
+$v_industry = isset($_POST['submit'])? $industry: '';
+$v_experience = isset($_POST['submit'])? $experience: '';
+$v_skills = isset($_POST['submit'])? $skills: '';
+$v_projects = isset($_POST['submit'])? $projects: '';
+
+$v_phone = isset($_POST['submit'])? $phone: '';
+$v_linkedin = isset($_POST['submit'])? $linkedin: '';
+$v_github =isset($_POST['submit'])? $github: '';
+$v_blog = isset($_POST['submit'])? $blog: '';
 }
 ?>
 
@@ -127,10 +215,10 @@ function validatePhone($phone) {
         <hr>
 
         <label for="name">Full Name:</label>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="text" id="name" name="name" value="<?php echo isset($_POST['submit'])? $name: '';?>" required><br><br>
 
         <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob"><br><br>
+        <input type="date" id="dob" name="dob" value="<?php echo $v_dob ; ?>"><br><br>
 
         <label for="gender">Gender:</label>
         <select id="gender" name="gender">
@@ -143,26 +231,26 @@ function validatePhone($phone) {
         <input type="file" id="profile_picture" name="profile_picture"><br><br>
 
         <label for="bio">Bio:</label>
-        <textarea id="bio" name="bio"></textarea><br><br>
+        <textarea id="bio" name="bio" value="<?php echo $v_bio ; ?>"></textarea><br><br>
 
         <h2>Academic Information</h2>
         <hr>
         <label for="graduation_year">Graduation Year:</label>
-        <input type="number" id="graduation_year" name="graduation_year" required min=1990 max=2025><br><br>
+        <input type="number" id="graduation_year" name="graduation_year" value="<?php echo $v_graduation_year ; ?>" required min=1990 max=2025><br><br>
 
         <label for="course">Course/Degree:</label>
-        <input type="text" id="course" name="course" maxlength="20" required><br><br>
+        <input type="text" id="course" name="course" maxlength="20" value="<?php echo isset($_POST['submit'])? $course: ''; ?>" required><br><br>
 
         <label for="specialization">Specialization:</label>
-        <input type="text" id="specialization" name="specialization" maxlength="20"><br><br>
+        <input type="text" id="specialization" name="specialization" value="<?php echo isset($_POST['submit'])? $specialization: ''; ?>" maxlength="20"><br><br>
 
         <h2>Professional Information</h2>
         <hr>
         <label for="job_title_curr">Job Title:</label>
-        <input type="text" id="job_title_curr" name="job_titlecurr"><br><br>
+        <input type="text" id="job_title_curr" name="job_titlecurr" value="<?php echo isset($_POST['submit'])? $job_title: ''; ?>"><br><br>
 
         <label for="company">Company Name:</label>
-        <input type="text" id="company" name="company"><br><br>
+        <input type="text" id="company" name="company" value="<?php echo isset($_POST['submit'])? $company: ''; ?>"><br><br>
 
         <label for="industry">Industry:</label>
         <select id="industry" name="industry">
@@ -173,15 +261,15 @@ function validatePhone($phone) {
         </select><br><br>
 
         <label for="experience">Work Experience (Years):</label>
-        <input type="number" id="experience" name="experience" min=0 max=30><br><br>
+        <input type="number" id="experience" name="experience" value="<?php echo $v_experience ; ?>" min=0 max=30><br><br>
 
         <label for="skills">Skills:</label>
-        <textarea id="skills" name="skills" maxlength="100"></textarea><br><br>
+        <textarea id="skills" name="skills" maxlength="100" value="<?php echo $v_skills ; ?>"></textarea><br><br>
 
         
 
         <label for="current_projects">Projects:</label>
-        <textarea id="current_projects" name="current_projects"></textarea><br><br>
+        <textarea id="current_projects" name="current_projects" value="<?php echo $v_projects ; ?>"></textarea><br><br>
 
         <h3>Past Companies</h3>
 
