@@ -1,14 +1,6 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "user_profiles";
+include('../includes/connection.txt');
 
-// Connect to database
-// $conn = new mysqli($servername, $username, $password, $dbname);
-// if ($conn->connect_error) {
-//     die("Connection failed: " . $conn->connect_error);
-// }
 
 if(isset($_POST['submit'])){
 // 🔴 Validate and Sanitize Input Function
@@ -21,7 +13,49 @@ $name = clean_input($_POST['name']);
 $dob = clean_input($_POST['dob']);
 $gender = clean_input($_POST['gender']);
 $bio = clean_input($_POST['bio']);
+if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
+    //$user_id = $_SESSION["user_id"]; // Get logged-in user's ID
+    $file_name = $_FILES["profile_picture"]["name"];
+    $file_tmp = $_FILES["profile_picture"]["tmp_name"];
+    $file_size = $_FILES["profile_picture"]["size"];
+    $file_type = $_FILES["profile_picture"]["type"];
 
+    // Set upload directory
+    $upload_dir = "uploads/";
+    // if (!is_dir($upload_dir)) {
+    //     mkdir($upload_dir, 0777, true); // Create the directory if not exists
+    // }
+
+    // Generate a unique file name to avoid conflicts
+    $unique_name = time() . "_" . $file_name;
+    $file_path = $upload_dir . $unique_name;
+
+    // Allowed file types (you can modify as needed)
+    $allowed_types = ["image/jpeg", "image/png", "application/pdf"];
+
+    if (in_array($file_type, $allowed_types)) {
+        if ($file_size < 2 * 1024 * 1024) { // Limit file size to 5MB
+            if (move_uploaded_file($file_tmp, $file_path)) {
+                $file_name_new=$file_name;
+                $file_path_new=$file_path;
+                // // Insert file data into the database
+                // $stmt = $conn->prepare("INSERT INTO user_files (user_id, file_name, file_path) VALUES (:user_id, :file_name, :file_path)");
+                // $stmt->bindParam(":user_id", $user_id);
+                // $stmt->bindParam(":file_name", $file_name);
+                // $stmt->bindParam(":file_path", $file_path);
+                // $stmt->execute();
+
+                // echo "File uploaded successfully.";
+            } else {
+                $errors['profile_picture']= "Error uploading file.";
+            }
+        } else {
+            $errors['profile_picture']= "File size must be less than 5MB.";
+        }
+    } else {
+        $errors['profile_picture']= "Invalid file type. Only JPG, PNG, and PDF files are allowed.";
+    }
+}
 $graduation_year = filter_var($_POST['graduation_year'], FILTER_VALIDATE_INT);
 $course = clean_input($_POST['course']);
 $specialization = clean_input($_POST['specialization']);
@@ -33,10 +67,16 @@ $experience = filter_var($_POST['experience'], FILTER_VALIDATE_INT);
 $skills = clean_input($_POST['skills']);
 $projects = clean_input($_POST['current_projects']);
 
+if(isset($_POST['company_name'])){
+    $past_companies = $_POST['company_name'];
+}
+
 $phone = clean_input($_POST['phone']);
 $linkedin = filter_var($_POST['linkedin'], FILTER_VALIDATE_URL);
 $github = filter_var($_POST['github'], FILTER_VALIDATE_URL);
 $blog = filter_var($_POST['website'], FILTER_VALIDATE_URL);
+
+$profile = $_POST['visibility'];
 
 function validateName($name) {
     return preg_match("/^[a-zA-Z ]+$/", $name); // Only letters and spaces
@@ -88,12 +128,12 @@ function validatePhone($phone) {
 
 $errors = [];
 // 🛑 Validate Image Upload
-if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
-    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!in_array($_FILES['profile_picture']['type'], $allowed_types) && $_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
-        $errors['profile_picture']= "invalid file type or image size is more than 2mb";
-    }
-}
+// if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
+//     $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+//     if (!in_array($_FILES['profile_picture']['type'], $allowed_types) && $_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+//         $errors['profile_picture']= "invalid file type or image size is more than 2mb";
+//     }
+// }
 
 if(!validateName($name) && !empty($name)){
     $errors['name']= "name should contain letters and spaces only";
@@ -153,27 +193,33 @@ if(!validatePhone($phone) && !empty($phone)){
     $errors['phone'] = "phone should only contain numbers, spaces only";
 }
 
+$stmt1 = $pdo->prepare("INSERT INTO user_info1 (full_name, dob, gender, profile_pic_name,profile_pic_path,bio, graduation_year, course_degree, specialization) VALUES (:full_name, :dob, :gender, :prof_pic_name,:prof_pic_path,:bio,:grad_yr,:course,:specialization)");
+$stmt1->bindParam(":full_name", $name, PDO::PARAM_STR);
+$stmt1->bindParam(":dob", $dob, PDO::PARAM_STR);
+$stmt1->bindParam(":gender", $gender, PDO::PARAM_STR);
+$stmt1->bindParam(":prof_pic_name", $file_name_new, PDO::PARAM_STR);
+$stmt1->bindParam(":prof_pic_path", $file_path_new, PDO::PARAM_STR);
+$stmt1->bindParam(":bio", $bio, PDO::PARAM_STR);
+$stmt1->bindParam(":grad_yr", $graduation_year, PDO::PARAM_INT);
+$stmt1->bindParam(":course", $course, PDO::PARAM_STR);
+$stmt1->bindParam(":specialization", $specialization, PDO::PARAM_STR);
 
 if(empty($errors)){
+    $stmt1->execute();
     echo "successful";
+    if(!empty($past_companies)){
+        foreach($past_companies as $past_company){
+            echo $past_company;
+        }
+    }
+    echo $profile;
 }
 else{
     foreach($errors as $error){
         echo $error;
     }
 }
-// 🔴 Prepare SQL Statement to Prevent SQL Injection
-// $stmt = $conn->prepare("INSERT INTO users (name, dob, gender, bio, graduation_year, course, specialization, phone, linkedin, github) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-// $stmt->bind_param("ssssisssss", $name, $dob, $gender, $bio, $graduation_year, $course, $specialization, $phone, $linkedin, $github);
 
-// if ($stmt->execute()) {
-//     echo "Profile updated successfully!";
-// } else {
-//     echo "Error: " . $stmt->error;
-// }
-
-// $stmt->close();
-// $conn->close();
 $v_name = isset($_POST['submit'])? $name: '';
 $v_dob = isset($_POST['submit'])? $dob: '';
 $v_gender = isset($_POST['submit'])? $gender: '';
