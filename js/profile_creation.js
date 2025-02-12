@@ -17,7 +17,7 @@ let companyCount = 1;
         <input type="text" name="role[]" id="role_${companyCount}" required>
 
         <label>Experience:</label>
-        <input type="number" name="experience[]" id="experience_${companyCount}" required min="0">
+        <input type="number" name="exp[]" id="experience_${companyCount}" required min="0">
 
         <button type="button" onclick="removeCompany(${companyCount})">Remove</button>
         <br><br>

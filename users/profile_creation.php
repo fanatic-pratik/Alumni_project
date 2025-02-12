@@ -67,16 +67,24 @@ $experience = filter_var($_POST['experience'], FILTER_VALIDATE_INT);
 $skills = clean_input($_POST['skills']);
 $projects = clean_input($_POST['current_projects']);
 
-if(isset($_POST['company_name'])){
-    $past_companies = $_POST['company_name'];
-}
 
+if(isset($_POST['company_name'])){
+    $past_companies = $_POST['company_name'] ?? [];
+}
+if(isset($_POST['role'])){
+    $past_role = $_POST['role'] ?? [];
+}
+if(isset($_POST['exp'])){
+    $past_exp = $_POST['exp'] ?? [];
+}
+print_r($past_role);
 $phone = clean_input($_POST['phone']);
 $linkedin = filter_var($_POST['linkedin'], FILTER_VALIDATE_URL);
 $github = filter_var($_POST['github'], FILTER_VALIDATE_URL);
-$blog = filter_var($_POST['website'], FILTER_VALIDATE_URL);
+$portfolio = filter_var($_POST['website'], FILTER_VALIDATE_URL);
 
 $profile = $_POST['visibility'];
+$contact_visibility = $_POST['contact_visibility'];
 
 function validateName($name) {
     return preg_match("/^[a-zA-Z ]+$/", $name); // Only letters and spaces
@@ -204,14 +212,66 @@ $stmt1->bindParam(":grad_yr", $graduation_year, PDO::PARAM_INT);
 $stmt1->bindParam(":course", $course, PDO::PARAM_STR);
 $stmt1->bindParam(":specialization", $specialization, PDO::PARAM_STR);
 
+$stmt2 = $pdo->prepare("Insert into job_profile_curr (job_title,company_name,industry,work_experience,skills,projects) values (:job_title,:com_name,:industry,:work_exp,:skills,:projects)");
+$stmt2->bindParam(":job_title",$job_title, PDO::PARAM_STR);
+$stmt2->bindParam(":com_name",$company, PDO::PARAM_STR);
+$stmt2->bindParam(":industry",$industry, PDO::PARAM_STR);
+$stmt2->bindParam(":work_exp",$experience, PDO::PARAM_INT);
+$stmt2->bindParam(":skills",$skills, PDO::PARAM_STR);
+$stmt2->bindParam(":projects",$projects, PDO::PARAM_STR);
+
+// $stmt3 = $pdo->prepare("Insert into past_companies (company_name,role,experience) values (:comp_name,:role,:exp)");
+// $temp= "INSERT INTO past_companies (user_id, company_name,role,experience) values (:id, :comp_name,:role1,:exp)";
+$stmt3 = $pdo->prepare("INSERT INTO past_companies (user_id, company_name,role1,experience) values (:id, :comp_name,:role1,:exp)");
+
+$stmt4 = $pdo->prepare("Insert into contact_information (phone_number, linkedin_profile, github_profile, portfolio, profile_visibility, contact_visibility) values(:phone,:linkedIn,:git,:portfolio,:prof_visi,:con_visi)");
+$stmt4->bindParam(":phone",$phone,PDO::PARAM_INT);
+$stmt4->bindParam(":linkedIn",$linkedin,PDO::PARAM_STR);
+$stmt4->bindParam(":git",$github,PDO::PARAM_STR);
+$stmt4->bindParam(":portfolio",$portfolio,PDO::PARAM_STR);
+$stmt4->bindValue(":prof_visi",$profile,PDO::PARAM_STR);
+$stmt4->bindValue(":con_visi",$contact_visibility,PDO::PARAM_STR);
+$c=1;
+
+
+        // Loop through each team member and execute the statement
+        
 if(empty($errors)){
     $stmt1->execute();
-    echo "successful";
-    if(!empty($past_companies)){
-        foreach($past_companies as $past_company){
-            echo $past_company;
+    $stmt2->execute();
+    for ($i = 0; $i < count($past_companies) ; $i++) {
+        $name = trim($past_companies[$i] ?? "");
+        $role1 = trim($past_role[$i] ?? "");
+        if (!isset($past_exp[$i]) || !is_numeric($past_exp[$i])) {
+            echo "Error: Experience value missing for company index $i <br>";
+            continue; // Skip this iteration if experience is missing
         }
+
+        $exp = (int) trim($past_exp[$i]);
+
+    // Print debug info before inserting
+    echo "Company: $name, Role: $role1, Experience: $exp <br>";
+        // Binding parameters before loop
+        $stmt3->bindValue(":id", $c , PDO::PARAM_INT);
+        $stmt3->bindValue(":comp_name", $name, PDO::PARAM_STR);
+        $stmt3->bindValue(":role1", $role1, PDO::PARAM_STR);
+        $stmt3->bindValue(":exp", $exp, PDO::PARAM_INT);
+        // $name = $past_companies[$i];
+        // $role1 = $past_role[$i];
+        // $exp =  $past_exp[$i];
+        $stmt3->execute(); // Execute the prepared statement with bound variables
+        // $exp = 0;
     }
+    
+
+
+    $stmt4->execute();
+    echo "successful";
+    // if(!empty($past_companies && $past_role && $past_exp)){
+    //     foreach($past_companies as $past_company){
+    //         echo $past_company;
+    //     }
+    // }
     echo $profile;
 }
 else{
@@ -329,7 +389,7 @@ $v_blog = isset($_POST['submit'])? $blog: '';
         <input type="text" name="role[]" id="role_1" required>
 
         <label>Experience:</label>
-        <input type="number" name="experience[]" id="experience_1" required min="0">
+        <input type="number" name="exp[]" id="experience_1" required min="0">
 
         <button type="button" onclick="removeCompany(1)">Remove</button>
         <br><br>
@@ -367,11 +427,11 @@ $v_blog = isset($_POST['submit'])? $blog: '';
         <label for="private">Private</label><br><br>
 
         <label>Contact Visibility:</label>
-        <input type="radio" id="contact_public" name="contact_visibility" value="public">
-        <label for="contact_public">Public</label>
-        <input type="radio" id="contact_admin" name="contact_visibility" value="admin">
+        <input type="radio" id="contact_public" name="contact_visibility" value="visible">
+        <label for="contact_public">Visible</label>
+        <input type="radio" id="contact_admin" name="contact_visibility" value="only-admins">
         <label for="contact_admin">Admins Only</label>
-        <input type="radio" id="contact_hide" name="contact_visibility" value="hide" checked>
+        <input type="radio" id="contact_hide" name="contact_visibility" value="hidden" checked>
         <label for="contact_hide">Hide</label><br><br>
 
         <button type="submit" name="submit">Create Profile</button>
