@@ -299,7 +299,7 @@ $v_projects = isset($_POST['submit'])? $projects: '';
 $v_phone = isset($_POST['submit'])? $phone: '';
 $v_linkedin = isset($_POST['submit'])? $linkedin: '';
 $v_github =isset($_POST['submit'])? $github: '';
-$v_blog = isset($_POST['submit'])? $blog: '';
+$v_blog = isset($_POST['submit'])? $portfolio: '';
 }
 ?>
 
