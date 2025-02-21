@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Both fields are required.";
     } else {
         // Prepare the SQL statement using PDO
-        $stmt = $pdo->prepare("SELECT user_id, password FROM users WHERE username = :username");
+        $stmt = $pdo->prepare("SELECT user_id, user_pass FROM users WHERE username = :username");
         $stmt->bindParam(":username", $username, PDO::PARAM_STR);
         $stmt->execute();
         
@@ -18,16 +18,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($user) {
             // Verify password
-            if (password_verify($password, $user['password'])) {
-                $_SESSION["user_id"] = $user['id'];
+            if (password_verify($password, $user['user_pass'])) {
+                $_SESSION["user_id"] = $user['user_id'];
                 $_SESSION["username"] = $username;
-                header("Location: dashboard.php");
-                exit;
+                // echo $_SESSION['user_id'];
+                header("Location: user_academic_info.php");
+                die();
             } else {
                 $error = "Invalid username or password.";
             }
         } else {
-            header("Location: register.php");
+            header("Location: registration.php");
             exit;
         }
     }
@@ -121,7 +122,7 @@ button:hover {
     <div class="login-container">
         <h2>Alumni Login</h2>
         <?php if (isset($error)) echo "<p class='error'>$error</p>"; ?>
-        <form action="login.php" method="POST" onsubmit="return validateForm()">
+        <form action="" method="POST" onsubmit="return validateForm()">
             <label>Username:</label>
             <input type="text" name="username" id="username" required>
             
