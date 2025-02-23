@@ -18,7 +18,15 @@ function clean_input($data) {
 
 // 🛑 Validate and Sanitize Inputs
 $name = clean_input($_POST['name']);
-$dob = clean_input($_POST['dob']);
+$do = DateTime::createFromFormat('d-m-Y', $_POST['dob']);
+if (!$do) {
+    $dob = DateTime::createFromFormat('Y-m-d', $_POST['dob']); // Try alternative format
+}
+
+if ($do) {
+    $dob = $do->format('Y-m-d'); // Convert to YYYY-MM-DD
+}
+ 
 $gender = clean_input($_POST['gender']);
 $bio = clean_input($_POST['bio']);
 // if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
@@ -113,9 +121,9 @@ if($flag===0){
 //     $stmt->execute([$name, $dob, $gender, $file_name_new, $file_path_new,$bio,$graduation_year,$course, $specialization]);
 // }
 // else{
-$stmt1 = $pdo->prepare("INSERT INTO user_info1 (full_name, dob, gender,bio, graduation_year, course_degree, specialization) VALUES (:full_name, :dob, :gender, :prof_pic_name,:prof_pic_path,:bio,:grad_yr,:course,:specialization)");
+$stmt1 = $pdo->prepare("INSERT INTO user_info1 (full_name, gender,bio, graduation_year, course_degree, specialization) VALUES (:full_name, :dob, :gender, :prof_pic_name,:prof_pic_path,:bio,:grad_yr,:course,:specialization)");
 $stmt1->bindParam(":full_name", $name, PDO::PARAM_STR);
-$stmt1->bindParam(":dob", $dob, PDO::PARAM_STR);
+// $stmt1->bindParam(":dob", $dob, PDO::PARAM_STR);
 $stmt1->bindParam(":gender", $gender, PDO::PARAM_STR);
 // $stmt1->bindParam(":prof_pic_name", $file_name_new, PDO::PARAM_STR);
 // $stmt1->bindParam(":prof_pic_path", $file_path_new, PDO::PARAM_STR);
@@ -151,8 +159,8 @@ else{
 }
 else{
     if(empty($errors)){
-    $stmt = $pdo->prepare("UPDATE user_info1 SET full_name=?, dob=?, gender=?, bio=?, graduation_year=?, course_degree=?, specialization=? WHERE user_id=1");
-    $stmt->execute([$name, $dob, $gender, $bio,$graduation_year,$course, $specialization]);
+    $stmt = $pdo->prepare("UPDATE user_info1 SET full_name=?, gender=?, bio=?, graduation_year=?, course_degree=?, specialization=? WHERE user_id=1");
+    $stmt->execute([$name, $gender, $bio,$graduation_year,$course, $specialization]);
     ob_clean();
     echo json_encode(["status" => "success", "message" => "Form updated successfully!"]);
     exit;

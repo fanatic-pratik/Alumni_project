@@ -80,6 +80,20 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
     <title>Personal & Academic Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" type="text/javascript" defer></script>
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    let dobInput = document.getElementById("dob");
+    
+    dobInput.addEventListener("change", function () {
+        let dateValue = new Date(dobInput.value);
+        if (!isNaN(dateValue)) {
+            let formattedDate = dateValue.toLocaleDateString("en-GB").split('/').reverse().join('-'); 
+            dobInput.value = formattedDate; // Convert YYYY-MM-DD to DD-MM-YYYY
+        }
+    });
+});
+
+    </script> -->
 </head>
 <body>
 
@@ -97,10 +111,10 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
                     <input type="text" id="name" name="name" class="form-control editable" value="<?php echo $user['full_name']?? '';?>" required onchange="isDirty=true;showBtn();" ><br><br>
                 </div>
 
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     <label for="dob">Date of Birth:</label>
-                    <input type="date" id="dob" name="dob" class="form-control editable" value="<?php echo $dobFormatted?? ''; ?>"><br><br>
-                </div>
+                    <input type="date" id="dob" name="dob" placeholder="DD-MM-YYYY" required class="form-control editable" value="<?//php echo $dobFormatted?? ''; ?>"><br><br>
+                </div> -->
 
                 <div class="mb-3">
                     <label for="gender">Gender:</label>
@@ -173,49 +187,91 @@ console.log("js is running");
 // window.$ = window.jQuery = jQuery.noConflict(true);
 // console.log("✅ jQuery is now locked in global scope:", $);
 // jQuery(document).ready(function() {
-    window.onload = function() {
-    console.log("jquery is running!");
-    if (typeof jQuery === "undefined") {
-        console.error("❌ jQuery is NOT loaded!");
-        return;
-    } else {
-        console.log("✅ jQuery is available:", jQuery.fn.jquery);
-    }
-    jQuery("#personalForm").submit(function(e) {
-        e.preventDefault(); // Prevent page reload
-        console.log("Form submitted!");
-        jQuery(".error").text(""); // Clear previous errors
-        jQuery("#messageBox").text(""); // Clear success message
+//     window.onload = function() {
+//     console.log("jquery is running!");
+//     if (typeof jQuery === "undefined") {
+//         console.error("❌ jQuery is NOT loaded!");
+//         return;
+//     } else {
+//         console.log("✅ jQuery is available:", jQuery.fn.jquery);
+//     }
+//     jQuery("#personalForm").submit(function(e) {
+//         e.preventDefault(); // Prevent page reload
+//         console.log("Form submitted!");
+//         jQuery(".error").text(""); // Clear previous errors
+//         jQuery("#messageBox").text(""); // Clear success message
 
-        jQuery.ajax({
-            type: "POST",
-            url: "ajax_personal1.php", // Change to your server script
-            data: jQuery(this).serialize(),
-            dataType: "text",
-            success: function(response) {
-                let jsonResponse = JSON.parse(response);
-        console.log("✅ Parsed JSON:", jsonResponse);
-                if (jsonResponse.status === "error") {
-                    // Display validation errors
-                    jQuery.each(jsonResponse.errors, function(key, value) {
-                        jQuery("#" + key + "Error").text(value).css("color", "red");
-                    });
-                } else {
-                    jQuery("#messageBox").text(jsonResponse.message).css("color", "green");
-                    jQuery("#personalForm")[0].reset(); // Reset form on success
-                }
-            }, error: function(xhr, status, error) {
-                console.error("❌ AJAX error:", error);
-    console.error("❌ Status:", status);
-    console.error("❌ XHR response:", xhr);
-    console.error("❌ Response Text:", xhr.responseText);
-        }
-        });
-    });
-    return false;
-}
+//         jQuery.ajax({
+//             type: "POST",
+//             url: "ajax_personal1.php", // Change to your server script
+//             data: jQuery(this).serialize(),
+//             dataType: "text",
+//             success: function(response) {
+//                 let jsonResponse = JSON.parse(response);
+//         console.log("✅ Parsed JSON:", jsonResponse);
+//                 if (jsonResponse.status === "error") {
+//                     // Display validation errors
+//                     jQuery.each(jsonResponse.errors, function(key, value) {
+//                         jQuery("#" + key + "Error").text(value).css("color", "red");
+//                     });
+//                 } else {
+//                     jQuery("#messageBox").text(jsonResponse.message).css("color", "green");
+//                     jQuery("#personalForm")[0].reset(); // Reset form on success
+//                 }
+//             }, error: function(xhr, status, error) {
+//                 console.error("❌ AJAX error:", error);
+//     console.error("❌ Status:", status);
+//     console.error("❌ XHR response:", xhr);
+//     console.error("❌ Response Text:", xhr.responseText);
+//         }
+//         });
+//     });
+//     return false;
+// }
 // });
 
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("personalForm").addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent form from reloading the page
+
+        let formData = new FormData(this);
+
+        fetch("ajax_personal1.php", {
+            method: "POST",
+            body: formData
+        })
+        // .then(response => response.json()) // Convert response to JSON
+        .then(text => {
+    console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
+    return JSON.parse(text);  // Now parse JSON
+})
+        .then(data => {
+            console.log("✅ Server Response:", data);
+
+            document.querySelectorAll(".error").forEach(el => el.textContent = ""); // Clear errors
+            document.getElementById("messageBox").textContent = ""; // Clear success message
+
+            if (data.status === "error") {
+                Object.keys(data.errors).forEach(key => {
+                    document.getElementById(key + "Error").textContent = data.errors[key];
+                });
+            } else {
+                document.getElementById("messageBox").textContent = data.message;
+                document.getElementById("personalForm").reset(); // Reset form
+            }
+        })
+// .then(response => {
+//     console.log("✅ Response Object:", response);
+//     return response.text();  // Get response as text first
+// })
+// .then(text => {
+//     console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
+//     return JSON.parse(text);  // Now parse JSON
+// })
+// .then(data => console.log("✅ Parsed JSON:", data))
+//         .catch(error => console.error("❌ Fetch Error:", error));
+    });
+});
 
 </script>
 
