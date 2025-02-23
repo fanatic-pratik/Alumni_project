@@ -2,7 +2,7 @@
 $host = 'localhost';
     $dbname = 'alumni'; // Replace with your database name
     $username = 'root'; // Default username for Laragon
-    $password = 'welcome123'; // Default password for Laragon is empty
+    $password = ''; // Default password for Laragon is empty
     
     try {
         // Create a new PDO instance
@@ -11,8 +11,10 @@ $host = 'localhost';
         // Set PDO error mode to exception
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        echo "Connected successfully to the database!<br>";
+        //echo "Connected successfully to the database!<br>";
     } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
+        //echo "Connection failed: " . $e->getMessage();
+        echo json_encode(["status" => "error", "message" => "Database connection failed: " . $e->getMessage()]);
+    exit;
     }
     ?>
