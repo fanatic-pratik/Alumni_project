@@ -3,18 +3,20 @@ error_log(print_r($_POST, true));
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header('Content-Type: application/json');
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include('../includes/connection.txt');
 
 //  $stm = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 //  $stm->execute([$user_id]);
 //  $flag = $stm->fetch(PDO::FETCH_ASSOC);
 $flag=1;
-
+$errors = [];
 if($_SERVER['REQUEST_METHOD'] == "POST"){
     // 🔴 Validate and Sanitize Input Function
    
-    $errors = [];
+    
 function clean_input($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
@@ -152,6 +154,7 @@ else{
 
 }
 else{
+    ob_clean();
     if(empty($errors)){
     $stmt = $pdo->prepare("UPDATE user_info1 SET full_name=?, gender=?, bio=?, graduation_year=?, course_degree=?, specialization=? WHERE user_id=1");
     $stmt->execute([$name, $gender, $bio,$graduation_year,$course, $specialization]);
@@ -164,6 +167,7 @@ else{
         echo json_encode(["status" => "error", "errors" => $errors]);
         exit;
     }
+    exit;
 }
 }
 ?>

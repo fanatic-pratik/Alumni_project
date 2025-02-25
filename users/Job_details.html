@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Step 2: Job Details</title>
+    <script>
+        function addPastCompany() {
+            let container = document.getElementById('pastCompaniesContainer');
+            let div = document.createElement('div');
+            div.innerHTML = `
+                <input type="text" name="past_company_name[]" placeholder="Past Company Name" required>
+                <input type="text" name="past_role[]" placeholder="Role" required>
+                <input type="number" name="past_experience[]" placeholder="Experience (years)" required min="0">
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+                <br>`;
+            container.appendChild(div);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Step 2: Job Details</h2>
+        <div class="progress"><div class="progress-bar" style="width: 66%;"></div></div>
+
+        <form action="job_details_preview.php" method="POST" enctype="multipart/form-data">
+            <input type="text" name="job_title" placeholder="Job Title" required>
+            <input type="text" name="company_name" placeholder="Company Name" required>
+            <input type="text" name="industry" placeholder="Industry" required>
+            <input type="number" name="work_experience" placeholder="Years of Experience" required min="0">
+            <textarea name="skills" placeholder="Skills"></textarea>
+            <textarea name="projects" placeholder="Projects"></textarea>
+
+            <h3>Past Companies</h3>
+            <div id="pastCompaniesContainer">
+                <button type="button" onclick="addPastCompany()">+ Add More</button>
+            </div>
+
+            <a href="register.html"><button type="button">Previous</button></a>
+            <button type="submit">Next</button>
+        </form>
+    </div>
+</body>
+</html>

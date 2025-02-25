@@ -2,7 +2,7 @@
 $host = 'localhost';
     $dbname = 'alumni'; // Replace with your database name
     $username = 'root'; // Default username for Laragon
-    $password = ''; // Default password for Laragon is empty
+    $password = 'welcome123'; // Default password for Laragon is empty
     
     try {
         // Create a new PDO instance

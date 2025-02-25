@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $_SESSION['user_id']=1;
 include('../includes/connection.txt');
@@ -108,7 +110,7 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
 
                 <div class="mb-3">
                     <label for="name">Full Name:</label>
-                    <input type="text" id="name" name="name" class="form-control editable" value="<?php echo $user['full_name']?? '';?>" required onchange="isDirty=true;showBtn();" ><br><br>
+                    <input type="text" id="name" name="name" class="form-control editable" value="<?php echo $user['full_name']?? '';?>" required onchange="isDirty=true;showBtn();" onblur="alert('blur is on.');"><br><br>
                 </div>
 
                 <!-- <div class="mb-3">
@@ -150,7 +152,7 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
                     <input type="text" class="form-control editable" id="specialization" name="specialization" value="<?php echo $user['specialization']; ?>" maxlength="20"><br><br>
                 </div>
 
-                <div class="error"></div>
+                <div id="error1" class="error"></div>
                 <div id="messageBox"></div>
                 <!-- <button type="button" id="editBtn" class="btn btn-warning" onclick="enableEdit()">Edit</button> -->
                 <!-- <button type="submit" id="saveBtn" class="btn btn-success" style="display:none;">Save</button> -->
@@ -230,10 +232,11 @@ console.log("js is running");
 //     return false;
 // }
 // });
-
+const errorContainer = document.getElementById("error1");
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("personalForm").addEventListener("submit", function (e) {
         e.preventDefault(); // Prevent form from reloading the page
+        errorContainer.innerHTML = "";
 
         let formData = new FormData(this);
         console.log("🔍 Sent Data:", Object.fromEntries(formData.entries()));
@@ -244,58 +247,73 @@ document.addEventListener("DOMContentLoaded", function () {
     },
             body: formData
         })
-        .then(response => {
-    console.log("🟢 Fetch Response Object:", response);
+//         .then(response => {
+//     console.log("🟢 Fetch Response Object:", response);
     
-    return response.text(); // ✅ Get raw response first
-})
-        // .then(response => response.json()) // Convert response to JSON
-        .then(text => {
-    console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
-    try {
-        let jsonData = JSON.parse(text);  // ✅ Now parse JSON
-        return jsonData;
-    } catch (error) {
-        console.error("❌ JSON Parse Error:", error);
-        throw new Error("Invalid JSON received from server.");
-    }
-})
-        .then(data => {
-            console.log("✅ Server Response:", data);
-
-            document.querySelectorAll(".error").forEach(el => el.textContent = ""); // Clear errors
-            document.getElementById("messageBox").textContent = ""; // Clear success message
-
-            if (data.status === "error") {
-                // Object.keys(data.errors).forEach(key => {
-                //     document.getElementById(key + "Error").textContent = data.errors[key];
-                // });
-                console.log("🔍 Errors Received:", data.errors);
-                let errorDiv = document.querySelector(".error"); // Select your single error div
-                errorDiv.innerHTML = ""; // Clear previous errors
-
-    // Append all errors inside the div
-                Object.values(data.errors).forEach(errorMessage => {
-                let errorParagraph = document.createElement("p");
-                errorParagraph.textContent = errorMessage;
-                errorParagraph.style.color = "red"; // Optional: Make errors red
-                errorDiv.appendChild(errorParagraph);
-    });
-            } else {
-                document.getElementById("messageBox").textContent = data.message;
-                document.getElementById("personalForm").reset(); // Reset form
-            }
-        })
-// .then(response => {
-//     console.log("✅ Response Object:", response);
-//     return response.text();  // Get response as text first
+//     return response.text(); // ✅ Get raw response first
 // })
-// .then(text => {
+//         // .then(response => response.json()) // Convert response to JSON
+//         .then(text => {
 //     console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
-//     return JSON.parse(text);  // Now parse JSON
+//     try {
+//         let jsonData = JSON.parse(text);  // ✅ Now parse JSON
+//         return jsonData;
+//     } catch (error) {
+//         console.error("❌ JSON Parse Error:", error);
+//         throw new Error("Invalid JSON received from server.");
+//     }
 // })
-// .then(data => console.log("✅ Parsed JSON:", data))
-//         .catch(error => console.error("❌ Fetch Error:", error));
+//         .then(data => {
+//             console.log("✅ Server Response:", data);
+
+//             document.querySelectorAll(".error").forEach(el => el.textContent = ""); // Clear errors
+//             document.getElementById("messageBox").textContent = ""; // Clear success message
+
+//             if (data.status === "error") {
+//                 // Object.keys(data.errors).forEach(key => {
+//                 //     document.getElementById(key + "Error").textContent = data.errors[key];
+//                 // });
+//                 console.log("🔍 Errors Received:", data.errors);
+//                 let errorDiv = document.querySelector(".error"); // Select your single error div
+//                 errorDiv.innerHTML = ""; // Clear previous errors
+
+//     // Append all errors inside the div
+//                 Object.values(data.errors).forEach(errorMessage => {
+//                 let errorParagraph = document.createElement("p");
+//                 errorParagraph.textContent = errorMessage;
+//                 errorParagraph.style.color = "red"; // Optional: Make errors red
+//                 errorDiv.appendChild(errorParagraph);
+//     });
+//             } else {
+//                 document.getElementById("messageBox").textContent = data.message;
+//                 document.getElementById("personalForm").reset(); // Reset form
+//             }
+//         })
+.then(response => {
+    console.log("✅ Response Object:", response);
+    return response.text();  // Get response as text first
+})
+.then(text => {
+    console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
+    return JSON.parse(text);  // Now parse JSON
+})
+.then(data => {
+        if (data.status === "error") {
+            // Format all errors into a single message
+            let errorMessages = "<ul>";
+            Object.keys(data.errors).forEach(key => {
+                errorMessages += `<li>${data.errors[key]}</li>`;
+            });
+            errorMessages += "</ul>";
+
+            errorContainer.innerHTML = errorMessages; // Show errors in the single div
+            errorContainer.style.display = "block"; // Make sure it is visible
+        } else {
+            alert("Form submitted successfully!");
+            errorContainer.innerHTML = ""; // Clear errors on success
+        }
+    })
+        .catch(error => console.error("❌ Fetch Error:", error));
     });
 });
 
