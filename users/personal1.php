@@ -150,6 +150,8 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
                     <input type="text" class="form-control editable" id="specialization" name="specialization" value="<?php echo $user['specialization']; ?>" maxlength="20"><br><br>
                 </div>
 
+                <div class="error"></div>
+                <div id="messageBox"></div>
                 <!-- <button type="button" id="editBtn" class="btn btn-warning" onclick="enableEdit()">Edit</button> -->
                 <!-- <button type="submit" id="saveBtn" class="btn btn-success" style="display:none;">Save</button> -->
                 <button id="dirty" style="display:none;" type="submit" class="btn btn-success">Save</button>
@@ -159,8 +161,7 @@ $dobFormatted = date("Y-m-d", strtotime($dob1));
                     <button type="submit" id="subBtn" class="btn btn-warning">Edit</button>
                     <!-- <button type="submit" id="saveBtn" class="btn btn-success" style="display:none;">Save</button> -->
                 <?php endif; */?>
-                <div class="error"></div>
-                <div id="messageBox"></div>
+                
             </form>
         </div>
     </div>
@@ -235,15 +236,29 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault(); // Prevent form from reloading the page
 
         let formData = new FormData(this);
-
+        console.log("🔍 Sent Data:", Object.fromEntries(formData.entries()));
         fetch("ajax_personal1.php", {
             method: "POST",
+            headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
             body: formData
         })
+        .then(response => {
+    console.log("🟢 Fetch Response Object:", response);
+    
+    return response.text(); // ✅ Get raw response first
+})
         // .then(response => response.json()) // Convert response to JSON
         .then(text => {
     console.log("✅ Raw Response:", text);  // Debugging - Check if it's valid JSON
-    return JSON.parse(text);  // Now parse JSON
+    try {
+        let jsonData = JSON.parse(text);  // ✅ Now parse JSON
+        return jsonData;
+    } catch (error) {
+        console.error("❌ JSON Parse Error:", error);
+        throw new Error("Invalid JSON received from server.");
+    }
 })
         .then(data => {
             console.log("✅ Server Response:", data);
@@ -252,9 +267,20 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("messageBox").textContent = ""; // Clear success message
 
             if (data.status === "error") {
-                Object.keys(data.errors).forEach(key => {
-                    document.getElementById(key + "Error").textContent = data.errors[key];
-                });
+                // Object.keys(data.errors).forEach(key => {
+                //     document.getElementById(key + "Error").textContent = data.errors[key];
+                // });
+                console.log("🔍 Errors Received:", data.errors);
+                let errorDiv = document.querySelector(".error"); // Select your single error div
+                errorDiv.innerHTML = ""; // Clear previous errors
+
+    // Append all errors inside the div
+                Object.values(data.errors).forEach(errorMessage => {
+                let errorParagraph = document.createElement("p");
+                errorParagraph.textContent = errorMessage;
+                errorParagraph.style.color = "red"; // Optional: Make errors red
+                errorDiv.appendChild(errorParagraph);
+    });
             } else {
                 document.getElementById("messageBox").textContent = data.message;
                 document.getElementById("personalForm").reset(); // Reset form

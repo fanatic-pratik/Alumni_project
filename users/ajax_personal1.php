@@ -1,4 +1,5 @@
 <?php
+error_log(print_r($_POST, true));
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header('Content-Type: application/json');
@@ -9,9 +10,11 @@ include('../includes/connection.txt');
 //  $stm->execute([$user_id]);
 //  $flag = $stm->fetch(PDO::FETCH_ASSOC);
 $flag=1;
+
 if($_SERVER['REQUEST_METHOD'] == "POST"){
     // 🔴 Validate and Sanitize Input Function
    
+    $errors = [];
 function clean_input($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
@@ -100,7 +103,7 @@ function validateCourse($course) {
 function validateSpecialization($specialization) {
     return preg_match("/^[\w\s,]+$/u", $specialization); // Only letters and spaces and commas ,underscore
 }
-$errors = [];
+
 
 if(!validateBio($bio) && !empty($bio)){
     $errors['bio'] = "bio should only contain letters, spaces, commas only";
@@ -145,16 +148,7 @@ else{
     echo json_encode(["status" => "error", "errors" => $errors]);
     exit;
 }
-// }
 
-// $v_name = isset($_POST['submit'])? $name: '';
-// $v_dob = isset($_POST['submit'])? $dob: '';
-// $v_gender = isset($_POST['submit'])? $gender: '';
-// $v_bio = isset($_POST['submit'])? $bio: '';
-
-// $v_graduation_year = isset($_POST['submit'])? $graduation_year: '';
-// $v_course = isset($_POST['submit'])? $course: '';
-// $v_specialization = isset($_POST['submit'])? $specialization: '';
 
 }
 else{
@@ -165,6 +159,7 @@ else{
     echo json_encode(["status" => "success", "message" => "Form updated successfully!"]);
     exit;
     }else{
+        error_log(print_r($errors, true));
         ob_clean();
         echo json_encode(["status" => "error", "errors" => $errors]);
         exit;
