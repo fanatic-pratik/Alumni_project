@@ -15,11 +15,31 @@
             container.appendChild(div);
         }
     </script>
+    <style>
+        .progress {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 66%; /* Step 2: 66% completion */
+            background-color: #4caf50;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            font-weight: bold;
+        }
+    </style>
+    
 </head>
 <body>
     <div class="container">
         <h2>Step 2: Job Details</h2>
-        <div class="progress"><div class="progress-bar" style="width: 66%;"></div></div>
+        <div class="progress"><div class="progress-bar" >66%</div></div>
 
         <form action="job_details_preview.php" method="POST" enctype="multipart/form-data">
             <input type="text" name="job_title" placeholder="Job Title" required>
@@ -34,9 +54,11 @@
                 <button type="button" onclick="addPastCompany()">+ Add More</button>
             </div>
 
-            <a href="register.html"><button type="button">Previous</button></a>
-            <button type="submit">Next</button>
+            
+            <button type="submit">Preview</button>
         </form>
+        <a href="register.html"><button type="button">Previous</button></a>
+        <a href="contact_info.html"><button>Next</button></a>
     </div>
 </body>
 </html>

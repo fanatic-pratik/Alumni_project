@@ -10,11 +10,32 @@
         .container { width: 50%; margin: auto; padding: 20px; }
         input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; }
         button { background: blue; color: white; padding: 10px; width: 48%; }
+       
+        .progress {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 33%; /* Step 2: 66% completion */
+            background-color: #4caf50;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            font-weight: bold;
+        }
+   
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Alumni Registration Form</h2>
+        <div class="progress"><div class="progress-bar" >33%</div></div>
+
         <form id="registerForm" action="preview.php" method="POST" enctype="multipart/form-data">
             <label>Full Name:</label>
             <input type="text" name="full_name" required>
@@ -49,8 +70,9 @@
             <input type="email" name="email" required>
 
             <button type="submit">Preview</button>
-            <button><a href="Job_details.php">Next</a>Next</button>
+            
         </form>
+        <a href="Job_details.html"><button>Next</button></a>
     </div>
 </body>
 </html>

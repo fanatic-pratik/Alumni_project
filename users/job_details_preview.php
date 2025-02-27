@@ -3,50 +3,26 @@ session_start();
 include('../includes/connection.txt');
 $_SESSION['user_id']=1;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)));
-    }
-    try {
-        $pdo->beginTransaction();
+    $_SESSION['job_title'] = $_POST['job_title'];
+    $_SESSION['company_name'] = $_POST['company_name'];
+    $_SESSION['industry'] = $_POST['industry'];
+    $_SESSION['work_experience'] = $_POST['work_experience'];
+    $_SESSION['skills'] = $_POST['skills'];
+    $_SESSION['projects'] = $_POST['projects'];
 
-        // Insert into `job_profile_curr`
-        $stmt = $pdo->prepare("INSERT INTO job_profile_curr (user_id, job_title, company_name, industry, work_experience, skills, projects) 
-                               VALUES (:user_id, :job_title, :company_name, :industry, :work_experience, :skills, :projects)");
-        $stmt->execute([
-            ':user_id' => $_SESSION['user_id'],
-            ':job_title' => $_SESSION['job_title'],
-            ':company_name' => $_SESSION['company_name'],
-            ':industry' => $_SESSION['industry'],
-            ':work_experience' => $_SESSION['work_experience'],
-            ':skills' => $_SESSION['skills'],
-            ':projects' => $_SESSION['projects']
-        ]);
-
-        // Insert Past Companies
-        if (!empty($_SESSION['past_companies'])) {
-            $stmt = $pdo->prepare("INSERT INTO past_companies (user_id, company_name, role1, experience) 
-                                   VALUES (:user_id, :company_name, :role, :experience)");
-            foreach ($_SESSION['past_companies'] as $company) {
-                $stmt->execute([
-                    ':user_id' => $_SESSION['user_id'],
-                    ':company_name' => $company['company_name'],
-                    ':role' => $company['role'],
-                    ':experience' => $company['experience']
-                ]);
-            }
+    $_SESSION['past_companies'] = [];
+    if (isset($_POST['past_company_name'])) {
+        for ($i = 0; $i < count($_POST['past_company_name']); $i++) {
+            $_SESSION['past_companies'][] = [
+                'company_name' => $_POST['past_company_name'][$i],
+                'role' => $_POST['past_role'][$i],
+                'experience' => $_POST['past_experience'][$i]
+            ];
         }
-
-        $pdo->commit();
-
-        // Clear session for this step
-        unset($_SESSION['job_title'], $_SESSION['company_name'], $_SESSION['industry'], $_SESSION['work_experience'], $_SESSION['skills'], $_SESSION['projects'], $_SESSION['past_companies']);
-
-        header("Location: contact_info.html"); // Move to next step
-        exit();
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        die("Error inserting data: " . $e->getMessage());
     }
+    // session_destroy();
+    // header("Location: job_details.html"); // Move to preview page
+    // exit();
 }
 ?>
 
@@ -78,9 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p>No past companies added.</p>
         <?php endif; ?>
 
-        <a href="job_details.html"><button type="button">Edit</button></a>
-        <form method="POST">
+        <form action="Job_detail.php" method="POST">
             <button type="submit">Confirm & Next</button>
+        </form>
+        <form action="Job_details.html" method="POST">
+            <button type="submit">Edit</button>
         </form>
     </div>
 </body>
