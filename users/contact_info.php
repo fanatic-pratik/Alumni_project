@@ -1,3 +1,26 @@
+<?php
+session_start();
+include('../includes/connection.txt');
+$sql="select * from contact_information where user_id=1";
+$result= $pdo->query($sql);
+$rs = $result->fetch();
+if($rs){
+    echo "hello";
+    $phone = $rs[2];
+    $linkedin = $rs[3];
+    $github = $rs[4];
+    $portfolio = $rs[5];
+
+}else{
+    echo "hello";
+    $phone = "";
+    $linkedin = "";
+    $github = "";
+    $portfolio = "";
+
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,16 +39,16 @@
 
         <form action="contact_info_pre.php" method="POST">
             <label for="phone_number">Phone:</label>
-            <input type="text" id="phone_number" name="phone_number" placeholder="Phone Number" maxlength="10" required>
+            <input type="text" id="phone_number" name="phone_number" placeholder="Phone Number" maxlength="10" value="<?php echo $phone; ?>" required>
             <br>
-            <label for="linkedin">LinedIn:</label>
-            <input type="url" id="linkedin" name="linkedin" placeholder="LinkedIn Profile">
+            <label for="linkedin">LinkedIn:</label>
+            <input type="url" id="linkedin" name="linkedin" placeholder="LinkedIn Profile" value="<?php echo $linkedin; ?>">
             <br>
             <label for="github">Github:</label>
-            <input type="url" id="github" name="github" placeholder="GitHub Profile">
+            <input type="url" id="github" name="github" placeholder="GitHub Profile" value="<?php echo $github; ?>">
             <br>
             <label for="portfolio">Portfolio:</label>
-            <input type="url" id="portfolio" name="portfolio" placeholder="Portfolio Website">
+            <input type="url" id="portfolio" name="portfolio" placeholder="Portfolio Website" value="<?php echo $portfolio; ?>">
             <br>
 
             <label>Profile Visibility:</label>

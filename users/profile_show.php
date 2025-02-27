@@ -106,38 +106,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p><strong>Profile Visibility:</strong> <?php echo htmlspecialchars($user4['profile_visibility']); ?></p>
         <p><strong>Contact Visibility:</strong> <?php echo htmlspecialchars($user4['contact_visibility']); ?></p>
 
-
-
-        <!-- <//?php if ($user4['profile_visibility'] === 'public' && $user4['contact_visibility'] === 'visible'): ?>
-            <p><strong>Contact Number:</strong> 
-                <//?php 
-                    echo htmlspecialchars($user4['phone_number']); 
-                ?>
-            </p>
-            <p><strong></strong> 
-                <//?php echo ($user['contact_visibility'] === 'public' || ($_SESSION['role'] === 'admin' && $user['contact_visibility'] === 'admin')) ? htmlspecialchars($user['address']) : "Hidden"; ?>
-            </p>
-        <//?php else: ?>
-            <p><em>This profile is private.</em></p>
-        <//?php endif; ?> -->
-
-        <!-- <h3>Update Profile Settings</h3>
-        <form action="profile.php" method="POST">
-            <label for="profile_visibility">Profile Visibility:</label>
-            <select name="profile_visibility">
-                <option value="public" <//?php echo $user['profile_visibility'] === 'public' ? 'selected' : ''; ?>>Public</option>
-                <option value="private" <//?php echo $user['profile_visibility'] === 'private' ? 'selected' : ''; ?>>Private</option>
-            </select>
-
-            <label for="contact_visibility">Contact Visibility:</label>
-            <select name="contact_visibility">
-                <option value="public" <//?php echo $user['contact_visibility'] === 'public' ? 'selected' : ''; ?>>Public</option>
-                <option value="private" <//?php echo $user['contact_visibility'] === 'private' ? 'selected' : ''; ?>>Private</option>
-                <option value="admin" <//?php echo $user['contact_visibility'] === 'admin' ? 'selected' : ''; ?>>Admin Only</option>
-            </select>
-
-            <button type="submit">Save Changes</button> -->
         </form>
+        <a href="register.html"><button>Edit Profile</button></a>
     </div>
 </body>
 </html>
