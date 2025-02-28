@@ -1,3 +1,36 @@
+<?php
+session_start();
+include('../includes/connection.txt');
+$sql="select * from user_info1 where user_id=1";
+$result= $pdo->query($sql);
+$rs = $result->fetch();
+if($rs){
+    echo "hello";
+    $f_name = $rs[1];
+    $dob = $rs[2];
+    $gender = $rs[3];
+    $profile_pic_name = $rs[4];
+    $profile_pic_path = $rs[5];
+    $bio = $rs[6];
+    $grad_yr = $rs[7];
+    $course_degree = $rs[8];
+    $specialization = $rs[9];
+    $u_email = $rs[11];
+
+}else{
+    echo "hello";
+    $f_name = "";
+    $dob = "";
+    $gender = "";
+    $profile_pic_name = "";
+    $profile_pic_path = "";
+    $bio = "";
+    $grad_yr = "";
+    $course_degree = "";
+    $specialization = "";
+    $u_email = "";
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,12 +69,12 @@
         <h2>Alumni Registration Form</h2>
         <div class="progress"><div class="progress-bar" >33%</div></div>
 
-        <form id="registerForm" action="preview.php" method="POST" enctype="multipart/form-data">
+        <form id="registerForm" action="academic_pre.php" method="POST" enctype="multipart/form-data">
             <label>Full Name:</label>
-            <input type="text" name="full_name" required>
+            <input type="text" name="full_name" value="<?php echo $f_name; ?>" required>
 
             <label>Date of Birth:</label>
-            <input type="date" name="dob" required>
+            <input type="date" name="dob" value="<?php echo $dob; ?>" required>
 
             <label>Gender:</label>
             <select name="gender" required>
@@ -55,19 +88,19 @@
             <input type="file" name="profile_picture" accept="image/*" required>
 
             <label>Bio:</label>
-            <textarea name="bio" rows="4"></textarea>
+            <textarea name="bio" rows="4" value="<?php echo $bio; ?>"><?php echo $bio; ?></textarea>
 
             <label>Graduation Year:</label>
-            <input type="number" name="graduation_year" min="1900" max="2099" required>
+            <input type="number" name="graduation_year" min="1900" max="2099" value="<?php echo $grad_yr; ?>" required>
 
             <label>Course/Degree:</label>
-            <input type="text" name="course" required>
+            <input type="text" name="course" value="<?php echo $course_degree; ?>" required>
 
             <label>Specialization:</label>
-            <input type="text" name="specialization" required>
+            <input type="text" name="specialization" value="<?php echo $specialization; ?>" required>
 
             <label>Email:</label>
-            <input type="email" name="email" required>
+            <input type="email" name="email" value="<?php echo $u_email; ?>" required>
 
             <button type="submit">Preview</button>
             

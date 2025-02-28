@@ -1,5 +1,6 @@
 <?php
 session_start();
+include('../includes/connection.txt');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone_number'];
     $linkedin = $_POST['linkedin'];

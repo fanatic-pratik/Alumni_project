@@ -7,14 +7,16 @@ function sanitize($data) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $_SESSION['full_name'] = sanitize($_POST['full_name']);
-    $_SESSION['dob'] = $_POST['dob'];
+    $f_name = sanitize($_POST['full_name']);
+    $dob = $_POST['dob'];
+    $gender = $_POST['gender'];
     $_SESSION['gender'] = $_POST['gender'];
-    $_SESSION['bio'] = sanitize($_POST['bio']);
-    $_SESSION['graduation_year'] = filter_var($_POST['graduation_year'], FILTER_VALIDATE_INT);
-    $_SESSION['course'] = sanitize($_POST['course']);
-    $_SESSION['specialization'] = sanitize($_POST['specialization']);
-    $_SESSION['email'] = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $bio = sanitize($_POST['bio']);
+    $grad_yr = filter_var($_POST['graduation_year'], FILTER_VALIDATE_INT);
+    $course_degree = sanitize($_POST['course']);
+    $specialization = sanitize($_POST['specialization']);
+    $u_email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    // $profile_pic_path = $_POST['profile_picture'];
     // $_SESSION['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
 
     // Handle Profile Picture Upload Temporarily
@@ -93,23 +95,47 @@ if (($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
 <body>
     <div class="container">
         <h2>Preview Your Details</h2>
-        <p><strong>Full Name:</strong> <?php echo $_SESSION['full_name']; ?></p>
-        <p><strong>Date of Birth:</strong> <?php echo $_SESSION['dob']; ?></p>
-        <p><strong>Gender:</strong> <?php echo $_SESSION['gender']; ?></p>
-        <p><strong>Bio:</strong> <?php echo $_SESSION['bio']; ?></p>
-        <p><strong>Graduation Year:</strong> <?php echo $_SESSION['graduation_year']; ?></p>
-        <p><strong>Course:</strong> <?php echo $_SESSION['course']; ?></p>
-        <p><strong>Specialization:</strong> <?php echo $_SESSION['specialization']; ?></p>
-        <p><strong>Email:</strong> <?php echo $_SESSION['email']; ?></p>
+        <p><strong>Full Name:</strong> <?php echo $f_name; ?></p>
+        <p><strong>Date of Birth:</strong> <?php echo $dob; ?></p>
+        <p><strong>Gender:</strong> <?php echo $gender; ?></p>
+        <p><strong>Bio:</strong> <?php echo $bio; ?></p>
+        <p><strong>Graduation Year:</strong> <?php echo $grad_yr; ?></p>
+        <p><strong>Course:</strong> <?php echo $course_degree; ?></p>
+        <p><strong>Specialization:</strong> <?php echo $specialization; ?></p>
+        <p><strong>Email:</strong> <?php echo $u_email; ?></p>
         <p><strong>Profile Picture:</strong></p>
-        <img src="<?php echo $_SESSION['profile_pic_path']; ?>" width="100px" alt="Profile Picture">
+        <img src="<?php echo $file_path_new; ?>" width="100px" alt="Profile Picture">
 
-        <form action="register.php" method="POST">
+        <form action="academic_submit.php" method="POST">
+            <input type="text" name="full_name" value="<?php echo $f_name; ?>" hidden>
+
+            <input type="date" name="dob" value="<?php echo $dob; ?>" hidden>
+
+            <select name="gender" hidden>
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <input type="file" name="profile_picture" accept="image/*" value="<?php echo $profile_pic_path; ?>" hidden>
+
+            <textarea name="bio" rows="4" value="<?php echo $bio; ?>" hidden><?php echo $bio; ?></textarea>
+
+            <input type="number" name="graduation_year" min="1900" max="2099" value="<?php echo $grad_yr; ?>" hidden>
+
+            <input type="text" name="course" value="<?php echo $course_degree; ?>" hidden>
+
+            <input type="text" name="specialization" value="<?php echo $specialization; ?>" hidden>
+
+            <input type="email" name="email" value="<?php echo $u_email; ?>" hidden>
+
             <button type="submit">Confirm & Register</button>
         </form>
-        <form action="register.html">
+        <!-- <form action="register.html">
             <button type="submit">Edit</button>
-        </form>
+        </form> -->
+        <a href="academic.php"><button type="button">Edit</button></a>
     </div>
 </body>
 </html>

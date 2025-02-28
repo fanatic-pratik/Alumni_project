@@ -3,12 +3,13 @@ session_start();
 include('../includes/connection.txt');
 $_SESSION['user_id']=1;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $_SESSION['job_title'] = $_POST['job_title'];
-    $_SESSION['company_name'] = $_POST['company_name'];
-    $_SESSION['industry'] = $_POST['industry'];
-    $_SESSION['work_experience'] = $_POST['work_experience'];
-    $_SESSION['skills'] = $_POST['skills'];
-    $_SESSION['projects'] = $_POST['projects'];
+    $job_title = $_POST['job_title'];
+    $company1 = $_POST['company_name'];
+    $industry = $_POST['industry'];
+    $_SESSION['industry']=$_POST['industry'];
+    $work_exp = $_POST['work_experience'];
+    $skills = $_POST['skills'];
+    $projects = $_POST['projects'];
 
     $_SESSION['past_companies'] = [];
     if (isset($_POST['past_company_name'])) {
@@ -36,12 +37,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Preview Job Details</h2>
         <div class="progress"><div class="progress-bar" style="width: 66%;"></div></div>
 
-        <p><strong>Job Title:</strong> <?= htmlspecialchars($_SESSION['job_title']) ?></p>
-        <p><strong>Company Name:</strong> <?= htmlspecialchars($_SESSION['company_name']) ?></p>
-        <p><strong>Industry:</strong> <?= htmlspecialchars($_SESSION['industry']) ?></p>
-        <p><strong>Work Experience:</strong> <?= htmlspecialchars($_SESSION['work_experience']) ?> years</p>
-        <p><strong>Skills:</strong> <?= nl2br(htmlspecialchars($_SESSION['skills'])) ?></p>
-        <p><strong>Projects:</strong> <?= nl2br(htmlspecialchars($_SESSION['projects'])) ?></p>
+        <p><strong>Job Title:</strong><?php echo htmlspecialchars($job_title); ?></p>
+        <p><strong>Company Name:</strong> <?php echo htmlspecialchars($company1); ?></p>
+        <p><strong>Industry:</strong> <?php echo htmlspecialchars($industry); ?></p>
+        <p><strong>Work Experience:</strong> <?php echo htmlspecialchars($work_exp); ?> years</p>
+        <p><strong>Skills:</strong> <?php echo nl2br(htmlspecialchars($skills)); ?></p>
+        <p><strong>Projects:</strong> <?php echo nl2br(htmlspecialchars($projects)); ?></p>
 
         <h3>Past Companies:</h3>
         <?php if (!empty($_SESSION['past_companies'])): ?>
@@ -55,9 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
 
         <form action="Job_detail.php" method="POST">
+        <input type="text" name="job_title" placeholder="Job Title" value="<?php echo $job_title; ?>" hidden>
+            <input type="text" name="company_name" placeholder="Company Name" value="<?php echo $company1; ?>" hidden>
+            <input type="text" name="industry" placeholder="Industry" value="<?php echo $_SESSION['industry']; ?>" hidden>
+            <input type="number" name="work_experience" placeholder="Years of Experience" value="<?php echo $work_exp; ?>" hidden min="0">
+            <textarea name="skills" placeholder="Skills" hidden><?php echo $skills; ?></textarea>
+            <textarea name="projects" placeholder="Projects" hidden><?php echo $projects; ?></textarea>
             <button type="submit">Confirm & Next</button>
         </form>
-        <form action="Job_details.html" method="POST">
+        <form action="Job_details.php" method="POST">
             <button type="submit">Edit</button>
         </form>
     </div>
