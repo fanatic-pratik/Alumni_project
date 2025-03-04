@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt4->bindValue(":con_visi",$_SESSION['contact_visibility'],PDO::PARAM_STR);
     if ($stmt4->execute()) {
         session_destroy();
-        header('location:job_details.html');
+        header('location:contact_info.php');
     } else {
         echo "Error: " . $stmt4->error;
     }
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt4->bindValue(":con_visi",$_SESSION['contact_visibility'],PDO::PARAM_STR);
     if ($stmt4->execute()) {
         session_destroy();
-        header('location:job_details.html');
+        header('location:contact_info.php');
     } else {
         echo "Error: " . $stmt4->error;
     }

@@ -105,7 +105,7 @@ if($rs){
             <button type="submit">Preview</button>
             
         </form>
-        <a href="Job_details.html"><button>Next</button></a>
+        <a href="job_details1.php"><button>Next</button></a>
     </div>
 </body>
 </html>

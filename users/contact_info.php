@@ -60,9 +60,11 @@ if($rs){
             <label><input type="radio" name="contact_visibility" value="Only Admins">Only Admins</label>
             <label><input type="radio" name="contact_visibility" value="Hidden">Hidden</label>
             <br>
-            <a href="job_details.html"><button type="button">Previous</button></a>
+            
             <button type="submit">Next</button>
         </form>
+        <a href="job_details1.php"><button type="button">Previous</button></a>
+        <a href="profile_show.php"><button>Show Profile</button></a>
     </div>
 </body>
 </html>

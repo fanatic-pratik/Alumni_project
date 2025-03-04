@@ -7,7 +7,18 @@ include("../includes/connection.txt");
 // }
 // $user_id = $_SESSION['user_id'];
 // Fetch user details
-$user_id = 1;
+$user_id=1;
+?>
+<table border=1 style="width:100%;border-collapse: collapse;" >
+                <tr>
+                <th>Sr.</th>
+                <th>Company Name</th>
+                <th>Exp yrs</th>
+                <th>Designation</th>
+                <th>Edit</th>
+                <th>Del</th>
+                </tr>
+<?php
 try {
     $stmt1 = $pdo->prepare("SELECT full_name,dob,gender,bio,graduation_year,course_degree,specialization FROM user_info1 WHERE user_id = :id");
     $stmt1->bindParam(':id', $user_id, PDO::PARAM_INT);
@@ -16,21 +27,38 @@ try {
     if (!$user) {
         die("User not found.");
     }
-
-    $stmt2 = $pdo->prepare("SELECT job_title,company_name,industry,work_experience,skills,projects FROM job_profile_curr WHERE user_id = :id");
-    $stmt2->bindParam(':id', $user_id, PDO::PARAM_INT);
-    $stmt2->execute();
-    $user2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
+    $ctr=0;
+    $stmt2 = "SELECT job_title,company_name,industry,work_experience,skills,projects FROM job_profile_curr WHERE user_id = $user_id";
+    $result=$pdo->query($stmt2);
+    // $stmt2->bindParam(':id', $user_id, PDO::PARAM_INT);
+    
+    // $user2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+    while($rs=$result->fetch()){
+        $ctr++;
+        ?>
+        <tr>
+        <td><?php echo "hello"; ?></td>
+               <td><?php echo $ctr; ?></td>
+               <td><?php echo $rs[3] ; ?></td>
+               <td><?php echo $rs[5] ; ?></td>
+               <td><?php echo $rs[2]; ?></td>
+        </tr>
+        <?php
+    }
+    ?>
+    </table>
+    <?php
+    
     // $stmt3 = $pdo->prepare("SELECT company_name,role1,experience FROM past_companies WHERE user_id = :id");
     // $stmt3->bindParam(':id', $user_id, PDO::PARAM_INT);
     // $stmt3->execute();
     // $user3 = $stmt3->fetchAll(PDO::FETCH_ASSOC);
-
+    
     $stmt4 = $pdo->prepare("SELECT phone_number, linkedin_profile,github_profile,portfolio,profile_visibility,contact_visibility FROM contact_information WHERE user_id = :id");
     $stmt4->bindParam(':id', $user_id, PDO::PARAM_INT);
     $stmt4->execute();
     $user4 = $stmt4->fetch(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Database error: " . $e->getMessage());
 }
@@ -46,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update_stmt->bindParam(':contact_visibility', $contact_visibility, PDO::PARAM_STR);
         $update_stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
         $update_stmt->execute();
-
+        
         $_SESSION['success'] = "Profile updated successfully!";
         header("Location: profile.php");
         exit;
@@ -58,20 +86,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
 </head>
-
 <body>
     <div class="profile-container">
         <h2>User Profile</h2>
 
         <?php if (isset($_SESSION['success'])): ?>
-            <p class="success"><?php echo $_SESSION['success'];
-                                unset($_SESSION['success']); ?></p>
+            <p class="success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
         <?php endif; ?>
 
         <p><strong>Name:</strong> <?php echo htmlspecialchars($user['full_name']); ?></p>
@@ -81,23 +106,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p><strong>Graduation Year:</strong> <?php echo htmlspecialchars($user['graduation_year']); ?></p>
         <p><strong>Course/Degree:</strong> <?php echo htmlspecialchars($user['course_degree']); ?></p>
         <p><strong>Specialization:</strong> <?php echo htmlspecialchars($user['specialization']); ?></p>
-
+       
         <h2>Current Job Details</h2>
-        <?php if ($user2) {
-            foreach ($user2 as $u) {
-        ?>
-                <p><strong>Job Title:</strong> <?php echo htmlspecialchars($u['job_title']); ?></p>
-                <p><strong>Company Name:</strong> <?php echo htmlspecialchars($u['company_name']); ?></p>
-                <p><strong>Industry:</strong> <?php echo htmlspecialchars($u['industry']); ?></p>
-                <p><strong>Work Experience:</strong> <?php echo htmlspecialchars($u['work_experience']); ?></p>
-                <p><strong>Skills:</strong> <?php echo htmlspecialchars($u['skills']); ?></p>
-                <p><strong>Projects:</strong> <?php echo htmlspecialchars($u['projects']); ?></p>
-        <?php
-            }
-        } else {
-            echo "No Job Details Found!!";
-        } ?>
+        <p><strong>Job Title:</strong> <?php echo htmlspecialchars($user2['job_title']); ?></p>
+        <p><strong>Company Name:</strong> <?php echo htmlspecialchars($user2['company_name']); ?></p>
+        <p><strong>Industry:</strong> <?php echo htmlspecialchars($user2['industry']); ?></p>
+        <p><strong>Work Experience:</strong> <?php echo htmlspecialchars($user2['work_experience']); ?></p>
+        <p><strong>Skills:</strong> <?php echo htmlspecialchars($user2['skills']); ?></p>
+        <p><strong>Projects:</strong> <?php echo htmlspecialchars($user2['projects']); ?></p>
 
+        <h2>Past Companies</h2>
+        <?php
+        foreach($user3 as $user_3): ?>
+        <p><strong>Company Name:</strong> <?php echo htmlspecialchars($user_3['company_name']); ?></p>
+        <p><strong>Role:</strong> <?php echo htmlspecialchars($user_3['role1']); ?></p>
+        <p><strong>Experience:</strong> <?php echo htmlspecialchars($user_3['experience']); ?></p>
+        <?php endforeach; ?>
 
         <h2>Contact Information</h2>
         <p><strong>Contact Number:</strong> <?php echo htmlspecialchars($user4['phone_number']); ?></p>
@@ -113,5 +137,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="register.html"><button>Edit Profile</button></a>
     </div>
 </body>
-
 </html>

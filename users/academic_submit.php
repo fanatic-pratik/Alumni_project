@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt4->bindParam(":fname", $f_name,PDO::PARAM_STR);
     $stmt4->bindParam(":dob", $dob,PDO::PARAM_STR);
     $stmt4->bindParam(":gen", $_SESSION['gender'],PDO::PARAM_STR);
-    $stmt1->bindParam(":pfp_name", $_SESSION['profile_pic_name'], PDO::PARAM_STR);
+    $stmt4->bindParam(":pfp_name", $_SESSION['profile_pic_name'], PDO::PARAM_STR);
     $stmt4->bindParam(":pfp_path",$_SESSION['profile_pic_path'],PDO::PARAM_STR);
     $stmt4->bindParam(":bio",$bio,PDO::PARAM_STR);
     $stmt4->bindParam(":grad_yr",$grad_yr,PDO::PARAM_STR);
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt4->execute()) {
         session_destroy();
-        header('location:job_details.html');
+        header('location:academic.php');
     } else {
         echo "Error: " . $stmt4->error;
     }
