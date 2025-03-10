@@ -2,7 +2,7 @@
 session_start();
 $_SESSION['user_id']=1;
 include("../includes/connection.txt");
-
+$userId = $_SESSION['user_id'];
 $sql = "Select * from posts";
 $result = $pdo->query($sql);
 
@@ -13,6 +13,9 @@ $posts = $pdo->query("
     GROUP BY p.post_id
     ORDER BY p.created_at DESC
 ")->fetchAll();
+
+
+
 // foreach ($posts as &$post) {
 //     $stmt = $pdo->prepare("
 //         SELECT c.*, u.name as username
@@ -182,8 +185,17 @@ $posts = $pdo->query("
             <?php
             // while($rs=$result->fetch()){
                 foreach($posts as $post){
+                    $postId=$post[0];
+                    
+                    $stmt = $pdo->prepare("SELECT COUNT(like_dislike) FROM likes WHERE like_dislike=1 AND post_id = ?");
+                    $stmt->execute([$postId]);
+                    $likes = $stmt->fetch();
+                    $stmt2 = $pdo->prepare("SELECT COUNT(like_dislike) FROM likes WHERE like_dislike= -1 AND post_id = ?");
+                    $stmt2->execute([$postId]);
+                    $dislikes = $stmt2->fetch();
             ?>
             <div class="post">
+            <?//php echo $postId;?>
                 <h4><?php echo $post[3];?></h4>
                 <div class="dropdown">
                 <a href="#" class="nav-link dropdown-toggle d-flex align-items-center user-dropdown" data-bs-toggle="dropdown">
@@ -205,10 +217,10 @@ $posts = $pdo->query("
                 <p><?php echo substr($post[6], 11, 5);?></p>
                 <div>
                     <button class="like-btn" data-post-id="<?php echo $post['post_id']; ?>">
-                        <i class="fas fa-thumbs-up"></i> Like (<span class="like-count">0</span>)
+                        <i class="fas fa-thumbs-up"></i> Like (<span class="like-count"><?php echo $likes[0]; ?></span>)
                     </button>
                     <button class="like-btn dislike" data-post-id="<?php echo $post['post_id']; ?>">
-                        <i class="fas fa-thumbs-down"></i>Dislike (<span class="dislike-count">0</span>)
+                        <i class="fas fa-thumbs-down"></i>Dislike (<span class="dislike-count"><?php echo $dislikes[0]; ?></span>)
                     </button>
                 </div>
             </div>
@@ -227,26 +239,26 @@ $posts = $pdo->query("
     <script>
 
 
-setInterval(function(){ t(); }, 3000);
+// setInterval(function(){ t(); }, 3000);
 
-function load_assgn(x){
+// function load_assgn(x){
 	
-	window.location.href = x;
-}
+// 	window.location.href = x;
+// }
 
 
-function t(){
+// function t(){
 
-var xhttp = new XMLHttpRequest();
-xhttp.onreadystatechange=function(){
-	if (this.readyState == 4 && this.status == 200){
-	document.getElementById("demo").innerHTML = this.responseText;
-	document.getElementById("rcount1").innerHTML="[Students Loggedin="+document.getElementById("rcount").innerHTML+"]  <a href=lreset.php?id=a>[RESET ALL]</a>";
-	}
-};
-xhttp.open("GET", "ajax_like.php", true);
-xhttp.send();
-}
+// var xhttp = new XMLHttpRequest();
+// xhttp.onreadystatechange=function(){
+// 	if (this.readyState == 4 && this.status == 200){
+// 	document.getElementById("demo").innerHTML = this.responseText;
+// 	document.getElementById("rcount1").innerHTML="[Students Loggedin="+document.getElementById("rcount").innerHTML+"]  <a href=lreset.php?id=a>[RESET ALL]</a>";
+// 	}
+// };
+// xhttp.open("GET", "ajax_like.php", true);
+// xhttp.send();
+// }
 
 // Like Button
 document.querySelectorAll('.like-btn').forEach(button => {
@@ -255,7 +267,7 @@ document.querySelectorAll('.like-btn').forEach(button => {
         fetch('like_post.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId })
+            body: JSON.stringify({ postId: postId, reaction: 1 })
         })
         .then(response => response.json())
         .then(data => {
@@ -271,10 +283,12 @@ document.querySelectorAll('.like-btn').forEach(button => {
 document.querySelectorAll('.dislike').forEach(button => {
     button.addEventListener('click', function () {
         const postId = this.getAttribute('data-post-id');
+        console.log(postId);
+        
         fetch('dislike_post.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId })
+            body: JSON.stringify({ postId: postId, reaction: -1 })
         })
         .then(response => response.json())
         .then(data => {
