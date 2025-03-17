@@ -1,6 +1,6 @@
 <?php
 session_start();
-$_SESSION['user_id']=1;
+$_SESSION['user_id']=2;
 include("../includes/connection.txt");
 $userId = $_SESSION['user_id'];
 $sql = "Select * from posts";
@@ -140,7 +140,7 @@ $posts = $pdo->query("
         <div class="container-fluid">
             <!-- Left Side: Logo & Name -->
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="logo.png" alt="Logo"> 
+                <!-- <img src="logo.png" alt="Logo">  -->
                 <span class="fw-bold">Alumni Connect</span>
             </a>
 
@@ -148,7 +148,7 @@ $posts = $pdo->query("
             <div class="d-flex align-items-center">
                 <!-- Home Icon -->
                 <a href="#" class="nav-item nav-link home">
-                    <i class="fas fa-home text-white"></i> Home
+                    <!-- <i class="fas fa-home text-white"></i> Home -->
                 </a>
 
                 <!-- Notification Icon -->
@@ -159,7 +159,7 @@ $posts = $pdo->query("
                 <!-- User Profile Dropdown -->
                 <div class="dropdown">
                     <a href="#" class="nav-link dropdown-toggle d-flex align-items-center user-dropdown" data-bs-toggle="dropdown">
-                        <img src="user-photo.jpg" alt="User"> 
+                        <!-- <img src="user-photo.jpg" alt="User">  -->
                         <span class="ms-2">John Doe</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -187,10 +187,10 @@ $posts = $pdo->query("
                 foreach($posts as $post){
                     $postId=$post[0];
                     
-                    $stmt = $pdo->prepare("SELECT COUNT(like_dislike) FROM likes WHERE like_dislike=1 AND post_id = ?");
+                    $stmt = $pdo->prepare("SELECT COUNT(l) FROM likes WHERE l=1 AND post_id = ?");
                     $stmt->execute([$postId]);
                     $likes = $stmt->fetch();
-                    $stmt2 = $pdo->prepare("SELECT COUNT(like_dislike) FROM likes WHERE like_dislike= -1 AND post_id = ?");
+                    $stmt2 = $pdo->prepare("SELECT COUNT(d) FROM likes WHERE d= 1 AND post_id = ?");
                     $stmt2->execute([$postId]);
                     $dislikes = $stmt2->fetch();
             ?>
@@ -216,13 +216,38 @@ $posts = $pdo->query("
                 <p><?php echo substr($post[6], 0, 10);?></p>
                 <p><?php echo substr($post[6], 11, 5);?></p>
                 <div>
-                    <button class="like-btn" data-post-id="<?php echo $post['post_id']; ?>">
-                        <i class="fas fa-thumbs-up"></i> Like (<span class="like-count"><?php echo $likes[0]; ?></span>)
+                    <button class="like-btn" data-post-id="<?php echo $post['post_id']; ?>" onclick="showHint(<?php echo $post[0];?>,<?php echo $userId;?>);">
+                        <i class="fas fa-thumbs-up"></i> Like 
                     </button>
-                    <button class="like-btn dislike" data-post-id="<?php echo $post['post_id']; ?>">
-                        <i class="fas fa-thumbs-down"></i>Dislike (<span class="dislike-count"><?php echo $dislikes[0]; ?></span>)
+                    <button class="like-btn dislike" data-post-id="<?php echo $post['post_id']; ?>" onclick="showHint1(<?php echo $post[0];?>,<?php echo $userId;?>);">
+                        <i class="fas fa-thumbs-down"></i>Dislike
                     </button>
+                    <span class="like-count" id="like<?php echo $post[0];?>"><?php echo ($likes[0])." Likes, Dislikes: ".$dislikes[0];?></span>
                 </div>
+                <div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Post Title</h5>
+        <p class="card-text">Post content goes here...</p>
+
+        <!-- Comment Section -->
+        <div class="mt-3">
+            <form class="comment-form" data-post-id="1">
+                <div class="mb-3">
+                    <textarea class="form-control comment-text" rows="2" placeholder="Write a comment..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+            </form>
+
+            <!-- Comments List -->
+            <div class="mt-3 comments-list">
+                <!-- Comments will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
             </div>
                 <?php } //} ?>
         </div>
@@ -238,6 +263,128 @@ $posts = $pdo->query("
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 
+function showHint(x,y) {
+	
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			document.getElementById("like"+x).innerHTML = this.responseText;
+		}
+	};
+	xmlhttp.open("GET", "like.php?q=" + x+"&u="+y, true);
+	xmlhttp.send();
+}
+
+function showHint1(x,y) {
+	
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			document.getElementById("like"+x).innerHTML = this.responseText;
+		}
+	};
+	xmlhttp.open("GET", "dislike.php?q=" + x+"&u="+y, true);
+	xmlhttp.send();console.log(x,y);
+}
+
+// Submit Comment
+document.querySelectorAll('.comment-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const postId = this.getAttribute('data-post-id');
+        const commentText = this.querySelector('.comment-text').value;
+
+        fetch('add_comment.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ postId: postId, commentText: commentText})
+        })
+        .then(response => {
+    if (!response.ok) {
+        return response.text().then(text => { throw new Error(text) });
+    }
+    return response.json();
+})
+        .then(data => {
+            if (data.success) {
+                // Clear the textarea
+                this.querySelector('.comment-text').value = '';
+
+                // Reload comments for this post
+                loadComments(postId);
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+// Load Comments
+function loadComments(postId) {
+    fetch('get_comments.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: postId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const commentsList = document.querySelector(`.comments-list[data-post-id="${postId}"]`);
+            commentsList.innerHTML = data.comments.map(comment => `
+                <div class="mb-3 comment" data-comment-id="${comment.id}">
+                    <strong>${comment.username}</strong>
+                    <p>${comment.comment_text}</p>
+                    <small class="text-muted">${comment.created_at}</small>
+
+                    <!-- Reply Form -->
+                    <form class="reply-form mt-2">
+                        <div class="mb-2">
+                            <textarea class="form-control reply-text" rows="1" placeholder="Reply to ${comment.username}..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">Reply</button>
+                    </form>
+
+                    <!-- Replies -->
+                    <div class="mt-2 replies-list">
+                        ${comment.replies.map(reply => `
+                            <div class="mb-2 reply">
+                                <strong>${reply.username}</strong>
+                                <p>${reply.comment_text}</p>
+                                <small class="text-muted">${reply.created_at}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+    });
+}
+
+// Submit Reply
+document.addEventListener('submit', function (e) {
+    if (e.target.classList.contains('reply-form')) {
+        e.preventDefault();
+        const commentId = e.target.closest('.comment').getAttribute('data-comment-id');
+        const replyText = e.target.querySelector('.reply-text').value;
+
+        fetch('add_comment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: postId, commentText: replyText, parentCommentId: commentId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear the reply textarea
+                e.target.querySelector('.reply-text').value = '';
+
+                // Reload comments for this post
+                loadComments(postId);
+            }
+        });
+    }
+});
+
 
 // setInterval(function(){ t(); }, 3000);
 
@@ -247,58 +394,7 @@ $posts = $pdo->query("
 // }
 
 
-// function t(){
 
-// var xhttp = new XMLHttpRequest();
-// xhttp.onreadystatechange=function(){
-// 	if (this.readyState == 4 && this.status == 200){
-// 	document.getElementById("demo").innerHTML = this.responseText;
-// 	document.getElementById("rcount1").innerHTML="[Students Loggedin="+document.getElementById("rcount").innerHTML+"]  <a href=lreset.php?id=a>[RESET ALL]</a>";
-// 	}
-// };
-// xhttp.open("GET", "ajax_like.php", true);
-// xhttp.send();
-// }
-
-// Like Button
-document.querySelectorAll('.like-btn').forEach(button => {
-    button.addEventListener('click', function () {
-        const postId = this.getAttribute('data-post-id');
-        fetch('like_post.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId, reaction: 1 })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const likeCount = this.querySelector('.like-count');
-                likeCount.textContent = data.likeCount;
-            }
-        });
-    });
-});
-
-// Dislike Button
-document.querySelectorAll('.dislike').forEach(button => {
-    button.addEventListener('click', function () {
-        const postId = this.getAttribute('data-post-id');
-        console.log(postId);
-        
-        fetch('dislike_post.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId, reaction: -1 })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const dislikeCount = this.querySelector('.dislike-count');
-                dislikeCount.textContent = data.dislikeCount;
-            }
-        });
-    });
-});
 </script>
 </body>
 </html>
