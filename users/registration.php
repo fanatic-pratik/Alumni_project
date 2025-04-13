@@ -90,7 +90,7 @@ if(isset($_POST['submit'])) {
    
     // If there are no errors, process the data
     if (empty($errors)) {
-        $sql = "INSERT INTO users (user_prn, uname, user_email, batch_year, month_section, username, password)
+        $sql = "INSERT INTO users (user_prn, uname, user_email, batch_year, month_section, username, user_pass)
             VALUES (:prn, :name, :email, :batch_year, :section, :username, :password)";
             try{
                 $stmt = $pdo->prepare($sql);
@@ -104,6 +104,7 @@ if(isset($_POST['submit'])) {
 
                 if($stmt->execute()){
                     echo "Registration Successful";
+                    header("location:login.php");
                 }
                 else{
                     echo "Registration Failed";

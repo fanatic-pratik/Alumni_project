@@ -1,5 +1,6 @@
 <?php
 session_start();
+$user_id = $_SESSION['user_id'];
 include('../includes/connection.txt');
 // Function to sanitize input
 function sanitize($data) {
@@ -16,27 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $course_degree = sanitize($_POST['course']);
     $specialization = sanitize($_POST['specialization']);
     $u_email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-    // $profile_pic_path = $_POST['profile_picture'];
-    // $_SESSION['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-    // Handle Profile Picture Upload Temporarily
-//     $targetDir = "uploads/temp/";
-//     if (!file_exists($targetDir)) mkdir($targetDir, 0777, true);
-
-//     $fileName = basename($_FILES["profile_picture"]["name"]);
-//     $targetFilePath = $targetDir . uniqid() . "_" . $fileName;
-//     $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
-
-//     if (!in_array($fileType, ["jpg", "jpeg", "png"])) {
-//         die("Only JPG, JPEG, and PNG files are allowed.");
-//     }
-
-//     if (!move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $targetFilePath)) {
-//         die("Error uploading file.");
-//     }
-
-//     
-
+    $default_img = "uploads/default.jpg";
 // Move file to permanent directory
 if (($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
     //$user_id = $_SESSION["user_id"]; // Get logged-in user's ID
@@ -61,23 +42,40 @@ if (($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
     if (in_array($file_type, $allowed_types)) {
         if ($file_size < 2 * 1024 * 1024) { // Limit file size to 5MB
             if (move_uploaded_file($file_tmp, $file_path)) {
-                $file_name_new=$file_name;
-                $file_path_new=$file_path;
-       
-                echo "File uploaded successfully.";
-            } else {
-                $errors['profile_picture']= "Error uploading file.";
+                $_SESSION['profile_pic_path']=$file_path;
+            }else{
+                $_SESSION['profile_pic_path'] = $default_img;
             }
-        } else {
-            $errors['profile_picture']= "File size must be less than 5MB.";
+        }else{
+            $errors['profile_picture']="File should be less than 2 MB";
         }
-    } else {
-        $errors['profile_picture']= "Invalid file type. Only JPG, PNG, and PDF files are allowed.";
+    }else{
+        $errors['profile_picture']="Invalid file type. Only JPG, PNG, and PDF files are allowed.";
     }
-    $_SESSION['profile_pic_name']=$file_name_new;
-    $_SESSION['profile_pic_path'] = $file_path_new;
+}else{
+    $_SESSION['profile_pic_path']=$default_img;
 }
 }
+
+
+
+//                 $file_name_new=$file_name;
+//                 $file_path_new=$file_path;
+//                 echo "File uploaded successfully.";
+//             } else {
+//                 $errors['profile_picture']= "Error uploading file.";
+//             }
+//         } else {
+//             $errors['profile_picture']= "File size must be less than 5MB.";
+//         }
+//     } else {
+//         $errors['profile_picture']= "Invalid file type. Only JPG, PNG, and PDF files are allowed.";
+//     }
+//     $_SESSION['profile_pic_name']=$file_name_new;
+//     $_SESSION['profile_pic_path'] = $file_path_new;
+// }
+// }
+
 ?>
 
 <!DOCTYPE html>
@@ -104,7 +102,7 @@ if (($_FILES['profile_picture']) && $_FILES['profile_picture']['size'] > 0) {
         <p><strong>Specialization:</strong> <?php echo $specialization; ?></p>
         <p><strong>Email:</strong> <?php echo $u_email; ?></p>
         <p><strong>Profile Picture:</strong></p>
-        <img src="<?php echo $file_path_new; ?>" width="100px" alt="Profile Picture">
+        <img src="<?php echo $_SESSION['profile_pic_path']; ?>" width="100px" alt="Profile Picture">
 
         <form action="academic_submit.php" method="POST">
             <input type="text" name="full_name" value="<?php echo $f_name; ?>" hidden>

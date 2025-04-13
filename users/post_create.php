@@ -1,109 +1,148 @@
 <?php
 session_start();
-include("../includes/connection.txt");
+include('../includes/connection.txt');
 
-if(isset($_POST['submit'])){
-    function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
+$user_id = $_SESSION['user_id'];
+
+// Handle AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
+    if (!$user_id) {
+        echo "You must be logged in to post.";
+        exit;
     }
-    $post_type = sanitize($_POST['postType']);
-    $title = sanitize($_POST['postTitle']);
-    $content = sanitize($_POST['postContent']);
 
-    $mediaPath = null;
-    if ($post_type === 'image') {
-        if (isset($_FILES['mediaFile'])) {
-            $file = $_FILES['mediaFile'];
-            $fileName = uniqid() . '_' . basename($file['name']); // Unique filename
-            $uploadDir = 'uploads/posts/'; // Directory to store uploaded files
-            $uploadPath = $uploadDir . $fileName;
+    $post_type = $_POST['post_type'];
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']) ?? null;
+    $media_path = null;
 
-            // Move uploaded file to the uploads directory
-            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                $mediaPath = $uploadPath;
-            } else {
-                die("File upload failed.");
-            }
+    // Handle image only if post_type is image
+    if ($post_type === 'image' && !empty($_FILES['media']['name'])) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($_FILES['media']['type'], $allowedTypes)) {
+            echo "Only JPG, PNG, GIF, or WEBP images are allowed.";
+            exit;
+        }
+
+        $uploadDir = "uploads/posts/";
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $uniqueName = uniqid() . '_' . basename($_FILES['media']['name']);
+        $targetPath = $uploadDir . $uniqueName;
+
+        if (!move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
+            echo "Image upload failed.";
+            exit;
+        }
+
+        $media_path = $targetPath;
+    }
+
+    // Basic keyword filtering (optional)
+    $restricted = ['hate', 'abuse', 'violence'];
+    foreach ($restricted as $word) {
+        if (stripos($title, $word) !== false || stripos($content, $word) !== false) {
+            echo "Post contains inappropriate content.";
+            exit;
         }
     }
-    $stmt1 = $pdo->prepare("INSERT INTO posts (user_id, post_type, title, content, media_path) VALUES (:user_id, :post_type, :title,:content,:mediaPath)");
-    $stmt1->bindParam(":user_id", $_SESSION['user_id'], PDO::PARAM_INT);
-    $stmt1->bindParam(":post_type", $post_type, PDO::PARAM_STR);
-    $stmt1->bindParam(":title", $title, PDO::PARAM_STR);
-    $stmt1->bindParam(":content", $content, PDO::PARAM_STR);
-    $stmt1->bindParam(":mediaPath", $mediaPath, PDO::PARAM_STR);
 
-    if ($stmt1->execute()) {
-        session_destroy();
-        header('location:home.php');
-    } else {
-        echo "Error: " . $stmt1->error;
-    }
+    // Save post
+    $stmt = $pdo->prepare("INSERT INTO posts (user_id, post_type, title, content, media_path, created_at, status) 
+                           VALUES (?, ?, ?, ?, ?, NOW(), 'pending')");
+    $stmt->execute([$user_id, $post_type, $title, $content, $media_path]);
+
+    echo "Post submitted successfully! Pending admin approval.";
+    exit;
 }
-
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>Document</title>
+    <title>Submit Post</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5>Create a New Post</h5>
-        </div>
-        <div class="card-body">
-            <form id="postForm" action="" method="POST" enctype="multipart/form-data">
-                <!-- Post Type Dropdown -->
-                <div class="mb-3">
-                    <label for="postType" class="form-label">Post Type</label>
-                    <select class="form-select" id="postType" name="postType" required>
-                        <option value="text">Text</option>
-                        <option value="image">Image</option>
-                        <!-- <option value="video">Video</option> -->
-                    </select>
-                </div>
 
-                <!-- Title Input -->
-                <div class="mb-3">
-                    <label for="postTitle" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="postTitle" name="postTitle" placeholder="Enter post title" required>
-                </div>
+<h3>Share Your Achievement or Update</h3>
 
-                <!-- Content Textarea -->
-                <div class="mb-3">
-                    <label for="postContent" class="form-label">Content</label>
-                    <textarea class="form-control" id="postContent" name="postContent" rows="5" placeholder="Write your post here..."></textarea>
-                </div>
+<form id="postForm" enctype="multipart/form-data">
+    <label>Post Type:</label>
+    <select name="post_type" id="postType" required>
+        <option value="text">Text</option>
+        <option value="image">Image</option>
+    </select><br><br>
 
-                <!-- File Upload (for Image/Video Posts) -->
-                <div class="mb-3" id="mediaUploadField" style="display: none;">
-                    <label for="mediaFile" class="form-label">Upload Media</label>
-                    <input type="file" class="form-control" id="mediaFile" name="mediaFile" accept="image/*, video/*">
-                </div>
+    <label>Title:</label><br>
+    <input type="text" name="title" required><br><br>
 
-                <!-- Submit Button -->
-                <input type="submit" class="btn btn-primary" value="Create Post" name="submit"></input>
-            </form>
-        </div>
+    <label>Content:</label><br>
+    <textarea name="content" id="contentBox" style="width:300px; height:80px;"></textarea><br><br>
+
+    <div id="imageSection" style="display:none;">
+        <label>Select Image:</label><br>
+        <input type="file" name="media" accept="image/*" id="imageInput"><br><br>
+
+        <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 200px; display: none; margin-top: 10px;"><br><br>
     </div>
-</div>
+
+    <button type="submit">Submit</button>
+</form>
+
+<div id="responseMsg" style="margin-top:10px; font-weight:bold;"></div>
+
 <script>
-    document.getElementById('postType').addEventListener('change', function () {
-    const mediaUploadField = document.getElementById('mediaUploadField');
-    if (this.value === 'image') {
-        mediaUploadField.style.display = 'block';
-    } else {
-        mediaUploadField.style.display = 'none';
-    }
-});
+    // Toggle content/image section
+    $("#postType").on("change", function () {
+        const type = $(this).val();
+        if (type === "image") {
+            $("#imageSection").show();
+            $("#contentBox").prop("required", false);
+        } else {
+            $("#imageSection").hide();
+            $("#contentBox").prop("required", true);
+            $("#imagePreview").hide(); // Hide preview when switching to text
+        }
+    });
+
+    // Preview image before upload
+    $("#imageInput").on("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $("#imagePreview").attr("src", e.target.result).show();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            $("#imagePreview").hide();
+        }
+    });
+
+    // AJAX Submit
+    $("#postForm").on("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        formData.append("ajax", 1);
+
+        $.ajax({
+            url: "",
+            method: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                $("#responseMsg").html(res);
+                $("#postForm")[0].reset();
+                $("#imageSection").hide();
+                $("#imagePreview").hide();
+            }
+        });
+    });
 </script>
+
 </body>
 </html>
-

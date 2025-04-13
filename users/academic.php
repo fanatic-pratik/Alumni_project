@@ -1,7 +1,9 @@
 <?php
 session_start();
 include('../includes/connection.txt');
-$sql="select * from user_info1 where user_id=1";
+$user_id = $_SESSION['user_id'];
+echo $user_id;
+$sql="select * from user_info1 where user_id = $user_id";
 $result= $pdo->query($sql);
 $rs = $result->fetch();
 if($rs){
@@ -85,7 +87,7 @@ if($rs){
             </select>
 
             <label>Profile Picture:</label>
-            <input type="file" name="profile_picture" accept="image/*" required>
+            <input type="file" name="profile_picture" accept="image/*" >
 
             <label>Bio:</label>
             <textarea name="bio" rows="4" value="<?php echo $bio; ?>"><?php echo $bio; ?></textarea>

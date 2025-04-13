@@ -1,7 +1,9 @@
 <?php
 session_start();
 include('../includes/connection.txt');
-$sql="select * from contact_information where user_id=1";
+$user_id=$_SESSION['user_id'];
+echo $user_id;
+$sql="select * from contact_information where user_id=$user_id";
 $result= $pdo->query($sql);
 $rs = $result->fetch();
 if($rs){

@@ -1,7 +1,8 @@
 <?php
 session_start();
 include('../includes/connection.txt');
-$_SESSION['user_id']=1;
+$user_id=$_SESSION['user_id'];
+echo $user_id;
 $jid=$_GET['id'];
 $sql= "select * from job_profile_curr where job_id = $jid";
 $result=$pdo->query($sql);
@@ -18,8 +19,9 @@ if(isset($_POST['submit'])){
     $skills = sanitize($_POST['skills']);
     $projects = sanitize($_POST['projects']);
 
-    $stmt1 = $pdo->prepare("UPDATE job_profile_curr SET  job_title=:job_title, company_name=:company_name, industry=:industry, work_experience=:work_experience, skills=:skills, projects=:projects WHERE job_id=$jid");
-    // $stmt1->bindParam(":user_id", $_SESSION['user_id'], PDO::PARAM_INT);
+    $stmt1 = $pdo->prepare("UPDATE job_profile_curr SET job_title=:job_title, company_name=:company_name, industry=:industry, work_experience=:work_experience,
+     skills=:skills, projects=:projects WHERE job_id=$jid");
+    // $stmt1->bindParam(":user_id", $user_id, PDO::PARAM_INT);
         $stmt1->bindParam(":job_title", $job, PDO::PARAM_STR);
         $stmt1->bindParam(":company_name", $company1, PDO::PARAM_STR);
         $stmt1->bindParam(":industry",$industry, PDO::PARAM_STR);
@@ -27,7 +29,6 @@ if(isset($_POST['submit'])){
         $stmt1->bindParam(":skills", $skills, PDO::PARAM_STR);
         $stmt1->bindParam(":projects", $projects, PDO::PARAM_STR);
         if ($stmt1->execute()) {
-            session_destroy();
             header('location:job_details1.php');
         } else {
             echo "Error: " . $stmt1->error;

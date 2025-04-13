@@ -1,3 +1,10 @@
+<?php
+session_start();
+include('../includes/connection.txt');
+$user_id = $_SESSION['user_id'];
+echo $user_id;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,9 +61,8 @@
                 <th>Del</th>
                 </tr>
             <?php
-            include('../includes/connection.txt');
             $ctr=0;
-            $sql= "select * from job_profile_curr where user_id=1";
+            $sql= "select * from job_profile_curr where user_id=$user_id";
             $result=$pdo->query($sql);
             while($rs=$result->fetch()){
                 $ctr++;

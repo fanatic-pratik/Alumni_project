@@ -1,13 +1,8 @@
 <?php
 session_start();
+$user_id = $_SESSION['user_id'];
+echo $user_id;
 include("../includes/connection.txt");
-// if (!isset($_SESSION['user_id'])) {
-//     header("Location: login.php"); // Redirect to login if not logged in
-//     exit;
-// }
-// $user_id = $_SESSION['user_id'];
-// Fetch user details
-$user_id = 1;
 try {
     $stmt1 = $pdo->prepare("SELECT full_name,dob,gender,bio,graduation_year,course_degree,specialization FROM user_info1 WHERE user_id = :id");
     $stmt1->bindParam(':id', $user_id, PDO::PARAM_INT);
@@ -21,11 +16,6 @@ try {
     $stmt2->bindParam(':id', $user_id, PDO::PARAM_INT);
     $stmt2->execute();
     $user2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-    // $stmt3 = $pdo->prepare("SELECT company_name,role1,experience FROM past_companies WHERE user_id = :id");
-    // $stmt3->bindParam(':id', $user_id, PDO::PARAM_INT);
-    // $stmt3->execute();
-    // $user3 = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
     $stmt4 = $pdo->prepare("SELECT phone_number, linkedin_profile,github_profile,portfolio,profile_visibility,contact_visibility FROM contact_information WHERE user_id = :id");
     $stmt4->bindParam(':id', $user_id, PDO::PARAM_INT);
@@ -110,7 +100,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p><strong>Contact Visibility:</strong> <?php echo htmlspecialchars($user4['contact_visibility']); ?></p>
 
         </form>
-        <a href="register.html"><button>Edit Profile</button></a>
+        <a href="academic.php"><button>Edit Profile</button></a>
+        <a href="home.php"><button>Main Page</button></a>
     </div>
 </body>
 

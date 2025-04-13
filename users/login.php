@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Both fields are required.";
     } else {
         // Prepare the SQL statement using PDO
-        $stmt = $pdo->prepare("SELECT user_id, user_pass FROM users WHERE username = :username");
+        $stmt = $pdo->prepare("SELECT user_id, user_pass, profile_status,role FROM users WHERE username = :username");
         $stmt->bindParam(":username", $username, PDO::PARAM_STR);
         $stmt->execute();
         
@@ -21,14 +21,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password_verify($password, $user['user_pass'])) {
                 $_SESSION["user_id"] = $user['user_id'];
                 $_SESSION["username"] = $username;
+                $_SESSION['role'] = $user['role'];
+
+                if($user['role'] === 'admin'){
+                    header("location:../admin/admin_dashboard.php");
+                }
+                elseif($user['profile_status'] == 1){
+                    header('location:home.php');
+                }else{
+                    header("location:academic.php");
+                }
                 // echo $_SESSION['user_id'];
-                header("Location: user_academic_info.php");
-                die();
+                exit();
             } else {
                 $error = "Invalid username or password.";
             }
         } else {
-            header("Location: registration.php");
+            $error = "User not found. Please register first.";
             exit;
         }
     }

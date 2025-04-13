@@ -77,8 +77,7 @@ include("../includes/connection.txt");
             background: white;
             padding: 15px;
             overflow-y: auto;
-            height: auto;
-            max-height: calc(100vh - 56px);
+            height: calc(100vh - 56px);
             border-radius: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
@@ -98,46 +97,27 @@ include("../includes/connection.txt");
         }
 
         /* Each post behaves like a snap point */
-        /* .post { */
-        /* min-height: auto; Ensures a minimum height */
-        /* max-height: 90vh; Prevents excessive height */
-        /* display: flex;
+        .post {
+            min-height: auto;
+            /* Ensures a minimum height */
+            max-height: 90vh;
+            /* Prevents excessive height */
+            /* display: flex;
             flex-grow: 0;
             flex-direction: column;
             justify-content: center;
             align-items: center; */
-        /* display: inline-block; Important: Makes it shrink to fit content */
-        /* width: 100%; Ensure full width */
-        /* text-align: center;
+            display: inline-block;
+            /* Important: Makes it shrink to fit content */
+            width: 100%;
+            /* Ensure full width */
+            text-align: center;
             border-bottom: 1px solid #ddd;
             scroll-snap-align: start;
             font-size: 24px;
             font-weight: bold;
-            color: black; */
-
-        /* } */
-
-
-        .post {
-            width: 100%;
-            padding: 15px;
-            box-sizing: border-box;
-            border-bottom: 1px solid #ddd;
-            scroll-snap-align: start;
-
-            /* Remove fixed height limits */
-            max-height: none;
-            min-height: auto;
-
-            /* Display block to stretch */
-            display: block;
-            text-align: left;
-
-            font-size: 18px;
-            font-weight: normal;
-            color: #333;
+            color: black;
         }
-
 
         /* Different post background colors */
         /* .post:nth-child(1) { background: #ff5733; }
@@ -174,7 +154,6 @@ include("../includes/connection.txt");
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
             padding: 5px;
             border-radius: 5px;
-            margin-left: 28.5%;
         }
 
         .post-options button {
@@ -328,7 +307,8 @@ include("../includes/connection.txt");
             <?php else: ?>
                 <?php foreach ($approvedPosts as $post): ?>
                     <div class="post" id="post-<?php echo $post['post_id']; ?>">
-                        <div class="post-header" style="text-align:right">
+                        <div class="post-header">
+                            <h3><?php echo htmlspecialchars($post['title']); ?></h3>
 
                             <?php if ($post['user_id'] == $user_id) { ?>
                                 <!-- Dropdown Button for Edit/Delete -->
@@ -338,12 +318,12 @@ include("../includes/connection.txt");
 
                                 <!-- Hidden Dropdown Menu -->
                                 <div class="post-options" id="post-options-<?php echo $post['post_id']; ?>" style="display: none;">
-                                    <button onclick="editPost(<?php echo $post['post_id']; ?>)">Edit Post</button>
-                                    <button onclick="deletePost(<?php echo $post['post_id']; ?>)">Delete Post</button>
+                                    <button onclick="editPost(<?php echo $post['post_id']; ?>)">Edit</button>
+                                    <button onclick="deletePost(<?php echo $post['post_id']; ?>)">Delete</button>
                                 </div>
                             <?php } ?>
                         </div>
-                        <!-- <p><//?php echo nl2br(htmlspecialchars($post['content'])); ?></p> -->
+                        <p><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
                     </div>
 
 
@@ -362,7 +342,6 @@ include("../includes/connection.txt");
                             <button onclick="reactToPost(<?= $post['post_id'] ?>, 'like')">👍 Like (<span id="like-count-<?= $post['post_id'] ?>"></span>)</button>
                             <button onclick="reactToPost(<?= $post['post_id'] ?>, 'dislike')">👎 Dislike (<span id="dislike-count-<?= $post['post_id'] ?>"></span>)</button>
                         </div><br>
-
                         <!-- Comment Form -->
                         <div class="comment-section">
                             <form onsubmit="submitComment(event, <?= $post['post_id'] ?>, null)">
@@ -659,4 +638,4 @@ include("../includes/connection.txt");
 
 </body>
 
-</html>
+</html> 
