@@ -144,6 +144,7 @@ button:hover {
             <button type="submit">Login</button>
         </form>
         <p>Not registered? <a href="registration.php">Create an account</a></p>
+        <a href="send_mail_demo.php">Forgot Password?</a>
     </div>
 
     <script>
